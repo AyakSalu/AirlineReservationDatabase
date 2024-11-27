@@ -19,11 +19,12 @@ cursor =conn.cursor()
 if __name__ == '__main__':
     
 
-    command = """SELECT Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
+    command = """SELECT flights.Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
-            where Airline IS NOT NULL"""
+                         join bookings on flights.Flight_Id = bookings.Flight_Id
+            where bookings.Passenger_ID = """ + '20' 
     values = executeCommand(command)
     print(values)
 
