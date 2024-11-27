@@ -1,6 +1,11 @@
 import tkinter as tk
-from tkinter import Label,Tk,Text,Button,Frame,END
+from tkinter import Label,Tk,Text,Button,END,Toplevel
 from AirlineDatabase import executeCommand
+from datetime import datetime
+maxBookingIdCommand = """SELECT max(Booking_ID)  
+            from bookings 
+            """ 
+next_booking_id = executeCommand(maxBookingIdCommand)
 def filtrele():
     text = personIdTextBox.get("1.0",END)
     global lst
@@ -20,6 +25,39 @@ def filtrele():
         table = TableSearched(root,table)
     return 0
 def biletSatinAl(biletNumarasi):
+    seat_col="C"
+    seat_row=0
+    seat_type = "Economy"
+    print("deneme")
+    def insertToTable():
+        command = """
+        INSERT INTO bookings (%s, %s, %s, %s,%s,%s,%s,%s)
+        """,next_booking_id,biletNumarasi,datetime.now(),seat_col,seat_row,"Occupied",seat_type
+        
+    newWindow = Toplevel(root)
+    newWindow.title("Purchase screen")
+    personSeatRow = Label(newWindow, text = "Satın Almak İstediğiniz Koltuğun Sırası")
+    personSeatRow.grid(sticky='W',row=1,column=1)
+    personSeatColumn = Label(newWindow, text = "Satın Almak İstediğiniz Koltuğun Sütunu")
+    personSeatColumn.grid(sticky='W',row=2,column=1)
+    personPurchaseAmountLabel = Label(newWindow, text = "Bilet Ücreti")
+    personPurchaseAmountLabel.grid(sticky='W',row=3,column=1)
+    personPurchaseAmount = Text(newWindow,height=1,width=20)
+    personPurchaseAmount.grid(sticky='W',row=3,column=2)
+    personPurchaseTypeLabel = Label(newWindow, text = "Ödeme Türü")
+    personPurchaseTypeLabel.grid(sticky='W',row=4,column=1)
+    personPurchaseType = Text(newWindow,height=1,width=20)
+    personPurchaseType.grid(sticky='W',row=4,column=2)
+    personSeatRowTextBox = Text(newWindow,height=1,width=20)
+    personSeatRowTextBox.grid(row=1,column=2) 
+
+    personSeatColumnTextBox = Text(newWindow,height=1,width=20)
+    personSeatColumnTextBox.grid(row=2,column=2) 
+
+    buyButton = Button(newWindow,text='Satın Al',height=4,command=insertToTable,relief='solid') 
+    buyButton.grid(row=1,column=3,rowspan=4)
+    
+    
     return 0
 class ScrolledFrame(tk.Frame):
 
@@ -73,15 +111,19 @@ class TableInitial:
                                font=('Arial',8))
         
         self.e.grid(row=2, column=3)
+        self.Labels.append(self.e)  
         self.e = Label(root,text="Arrival Airport", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.grid(row=2, column=4)
+        self.Labels.append(self.e)  
         self.e = Label(root,text="Departure Airport", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.grid(row=2, column=5)
+        self.Labels.append(self.e)  
         self.e = Label(root,text="Airline", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.grid(row=2, column=6)
+        self.Labels.append(self.e)  
         # code for creating table
         for i in range(total_rows):
             for j in range(total_columns):
@@ -94,7 +136,7 @@ class TableInitial:
                                font=('Arial',8))
                 self.Labels.append(self.e)            
                 self.e.grid(row=i+3, column=j+3)
-            self.e = Button(root,text='Satın Al',command=biletSatinAl(lst[i][0]),padx=0, pady=0,width=40, height=11,compound="center",
+            self.e = Button(root,text='Satın Al',command=lambda : biletSatinAl(lst[i][0]),padx=0, pady=0,width=40, height=11,compound="center",
                        image=pixel)
             self.Labels.append(self.e)
             self.e.grid(row=i+3, column=j+4)
@@ -108,16 +150,19 @@ class TableSearched:
         self.e = Label(root, text="Flight_Id",width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         
-        self.e.grid(row=2, column=3)
+        self.e.grid(sticky='W',row=2, column=3)
         self.e = Label(root,text="Arrival Airport", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
-        self.e.grid(row=2, column=4)
+        self.e.grid(sticky='W',row=2, column=4)
+        self.Labels.append(self.e)  
         self.e = Label(root,text="Departure Airport", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
-        self.e.grid(row=2, column=5)
+        self.e.grid(sticky='W',row=2, column=5)
+        self.Labels.append(self.e)  
         self.e = Label(root,text="Airline", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
-        self.e.grid(row=2, column=6)
+        self.e.grid(sticky='W',row=2, column=6)
+        self.Labels.append(self.e)  
         # code for creating table
         for i in range(total_rows):
             for j in range(total_columns):
@@ -129,7 +174,7 @@ class TableSearched:
                 self.e = Label(root,text=text ,width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
                 self.Labels.append(self.e)            
-                self.e.grid(row=i+3, column=j+3)
+                self.e.grid(sticky='W',row=i+3, column=j+3)
   
         
 
@@ -158,13 +203,13 @@ pixel = tk.PhotoImage(width=1, height=1)
 
 
 personIdTextBoxLabel = Label(root, text = "Biletlerinizi görmek ya da bilet almak için id'nizi giriniz")
-personIdTextBoxLabel.grid(row=1,column=0) 
+personIdTextBoxLabel.grid(sticky='W',row=1,column=1,columnspan=5) 
 personIdTextBox = Text(root,height=1,width=20)
-personIdTextBox.grid(row=1,column=1) 
+personIdTextBox.grid(row=1,column=6,columnspan=4) 
 
 
 searchButton = Button(root,text='Search',command=filtrele)
-searchButton.grid(row=1,column=2) 
+searchButton.grid(row=1,column=10) 
 table = TableInitial(root)
 
 
