@@ -4,13 +4,12 @@ from Sifreler import sifre
 
 
 def executeCommand(command):
-    with app.app_context():
-        cursor = mysql.connection.cursor()
-        cursor.execute(command)
-        data = cursor.fetchall()
-        cursor.close()
-        mysql.connection.commit()
-        return data
+    cursor = mysql.connection.cursor()
+    cursor.execute(command)
+    data = cursor.fetchall()
+    cursor.close()
+    mysql.connection.commit()
+    return data
 
 def insert_passengers(Fname, Lname, Passport_Number, Phone_Number, Email):
     command = """
@@ -36,7 +35,7 @@ def remove_booked_flight(flight_id, passport_num):
                % (flight_id, passport_num))
     return executeCommand(command)
 def get_avaliable_flights(departure_country, arrival_country):
-    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Country,Departure_Time, a2.Airport_Name,a2.Country, Arrival_Time , Airline
+    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time
     FROM flights 
     natural join planes
     inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
@@ -44,6 +43,13 @@ def get_avaliable_flights(departure_country, arrival_country):
     Where a1.Country = '%s' AND a2.Country ='%s' AND capacity > 0"""
                % (departure_country, arrival_country))
     print(command)
+    return executeCommand(command)
+
+def remove_booked_flight(flight_id, passport_num):
+    command = ("""DELETE FROM bookings 
+    WHERE bookings.Flight_ID = '%s' 
+    AND bookings.Passenger_ID IN (SELECT unique(Passenger_ID) from passengers WHERE Passport_Number = '%s')"""
+               % (flight_id, passport_num))
     return executeCommand(command)
 
 
@@ -72,7 +78,7 @@ def view_purchased_flights():
     command = """SELECT * FROM bookings WHERE Purchased_Flights"""
 
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     with app.app_context():
         cursor = mysql.connection.cursor()
 
