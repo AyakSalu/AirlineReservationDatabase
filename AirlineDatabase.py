@@ -1,7 +1,7 @@
 from flask_mysqldb import MySQL
 from flask import Flask
 from Sifreler import sifre
-
+from datetime import datetime
 
 def executeCommand(command):
     cursor = mysql.connection.cursor()
@@ -155,18 +155,16 @@ if __name__ == '__main__':
                 INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
                 VALUES ('%s', '%s', '%s', '%s', '%s');
             """%(fname,lname,passportNumber,phoneNumber,email)
+        biletNumarasi=1
+        personid=1
+        time= datetime.now()
+        seat_row=1
+        seat_col="A"
+        seat_type="Economy"
         command = """
-        Select Passenger_ID from Passengers 
-        where Passport_Number = '%s'
-        """%("p2")
-        text = "P2311557"
-        command = """SELECT flights.Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
-            from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
-                         join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
-                         join planes on planes.Plane_ID = flights.Plane_ID
-                         join bookings on flights.Flight_Id = bookings.Flight_Id
-                         join passengers on passengers.Passenger_ID = bookings.Passenger_ID
-            where passengers.Passport_Number = '%s'"""%text
+        INSERT INTO Bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type) 
+            VALUES (%s, %s, '%s', '%s', %s, '%s', '%s');
+        """%(biletNumarasi,personid,time,seat_col,seat_row,"Confirmed",seat_type)
         print(command)
         values = executeCommand(command)
         print(values)  # For INSERT, this will likely print 0 as no rows are returned

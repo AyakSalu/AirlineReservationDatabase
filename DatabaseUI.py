@@ -29,10 +29,11 @@ def filtrele():
         table = TableSearched(root,table)
     return 0
 def biletSatinAl(biletNumarasi):
-    seat_col="C"
-    seat_row=0
-    seat_type = "Economy"
+    
     def insertToTable():
+        seat_col=personSeatColumnTextBox.get("1.0",'end-1c')
+        seat_row=personSeatRowTextBox.get("1.0",'end-1c')
+        seat_type = "Economy"
         passportNumber = personPassportText.get("1.0",'end-1c')
         fname = personNameText.get("1.0",'end-1c')
         lname = personLastNameText.get("1.0",'end-1c')
@@ -40,8 +41,8 @@ def biletSatinAl(biletNumarasi):
         email = personEmailText.get("1.0",'end-1c')
         amount = personPurchaseAmount.get("1.0",'end-1c')
         paymentMethod = personPurchaseType.get("1.0",'end-1c')
+        print("%s %s %s %s %s %s %s "%(passportNumber,fname,lname,phoneNumber,email,amount,paymentMethod))
         time = datetime.now()
-
 
 
         #ilk önce passanger tablosuna sonra  booking tablosuna sonrada payment tablosuna ekleme yapılmalı
@@ -78,6 +79,7 @@ def biletSatinAl(biletNumarasi):
             VALUES (%s, %s, '%s', '%s', %s, '%s', '%s');
         """%(biletNumarasi,personid,time,seat_col,seat_row,"Confirmed",seat_type)
         with app.app_context():
+            print(command)
             executeCommand(command)
 
         command = """
@@ -86,7 +88,7 @@ def biletSatinAl(biletNumarasi):
         """%(biletNumarasi,personid)
 
         with app.app_context():
-            booking_id = executeCommand(command)
+            booking_id = executeCommand(command)[0][0]
             print("res3" + str(booking_id))
 
         command = """
