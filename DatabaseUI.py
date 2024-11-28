@@ -1,11 +1,8 @@
 import tkinter as tk
 from tkinter import Label,Tk,Text,Button,END,Toplevel
-from AirlineDatabase import executeCommand
+from AirlineDatabase import executeCommand, app
 from datetime import datetime
-maxBookingIdCommand = """SELECT max(Booking_ID)  
-            from bookings 
-            """ 
-next_booking_id = executeCommand(maxBookingIdCommand)[0][0]+1
+
 def filtrele():
     text = personIdTextBox.get("1.0",END)
     global lst
@@ -19,7 +16,8 @@ def filtrele():
                          join planes on planes.Plane_ID = flights.Plane_ID
                          join bookings on flights.Flight_Id = bookings.Flight_Id
             where bookings.Passenger_ID = """ + text
-        lst = executeCommand(command)
+        with app.app_context():
+            lst = executeCommand(command)
         total_rows = len(lst)
         total_columns = len(lst[0])
         table = TableSearched(root,table)
@@ -43,10 +41,11 @@ def biletSatinAl(biletNumarasi):
         #ilk önce passanger tablosuna sonra  booking tablosuna sonrada payment tablosuna ekleme yapılmalı
         #aynı pasaport numarasına sahip passanger varsa eklenmiyecek
         command = """
-        Select Passanger_id from Passangers 
+        Select Passenger_id from passengers 
         where Passport_number = %s
         """,passportNumber
-        result = executeCommand(command)
+        with app.app_context():
+            result = executeCommand(command)
         if len(result) != 0 :
             command = """
                 INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
@@ -57,7 +56,8 @@ def biletSatinAl(biletNumarasi):
         Select Passenger_id from Passengers 
         where Passport_Number = '%s'
         """,passportNumber
-        personid = executeCommand(command)
+        with app.app_context():
+            personid = executeCommand(command)
 
         command = """
         INSERT INTO Bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type) 
@@ -68,13 +68,16 @@ def biletSatinAl(biletNumarasi):
         Select Booking_id from Bookings 
         where Flight_ID = '%s'
         """,biletNumarasi
-        booking_id = executeCommand(command)
+
+        with app.app_context():
+            booking_id = executeCommand(command)
 
         command = """
         INSERT INTO Payments (Booking_ID, Amount, Payment_Date, Payment_Method) VALUES 
         (%s, %s, '%s', '%s');
         """,booking_id,amount,time,paymentMethod
-        executeCommand(command)
+        with app.app_context():
+            executeCommand(command)
         
     newWindow = Toplevel(root)
     newWindow.title("Purchase screen")
@@ -256,9 +259,6 @@ class TableSearched:
                 self.e.grid(sticky='W',row=i+3, column=j+3)
                 self.e.configure(background='white')
   
-        
-
-
 
 # take the data
 command = """SELECT Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
@@ -267,14 +267,16 @@ command = """SELECT Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airpo
                          join planes on planes.Plane_ID = flights.Plane_ID
                          
             """
-lst = executeCommand(command)
-lst += executeCommand(command)
+
+with app.app_context():
+    lst = executeCommand(command)
+    lst += executeCommand(command)
 # find total number of rows and
 # columns in list
 total_rows = len(lst)
 total_columns = len(lst[0])
 
-root  = Tk()
+root = Tk()
 root.title("AirlineManagement")
 root.geometry('1600x700+100+100')
 root.configure(background='white')
