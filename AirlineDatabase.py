@@ -4,12 +4,13 @@ from Sifreler import sifre
 
 
 def executeCommand(command):
-    cursor = mysql.connection.cursor()
-    cursor.execute(command)
-    data = cursor.fetchall()
-    cursor.close()
-    mysql.connection.commit()
-    return data
+    with app.app_context():
+        cursor = mysql.connection.cursor()
+        cursor.execute(command)
+        data = cursor.fetchall()
+        cursor.close()
+        mysql.connection.commit()
+        return data
 
 def insert_passengers(Fname, Lname, Passport_Number, Phone_Number, Email):
     command = """
@@ -83,7 +84,7 @@ if __name__ == '__main__':
         cursor = mysql.connection.cursor()
 
         command = """
-             SELECT Flight_Code,a1.Airport_Name, a1.Country,Departure_Time, a2.Airport_Name,a2.Country, Arrival_Time , Airline
+             SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time , Airline
     FROM flights
     natural join planes
     inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
