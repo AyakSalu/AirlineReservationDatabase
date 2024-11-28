@@ -29,7 +29,12 @@ def insert_passengers(Fname, Lname, Passport_Number, Phone_Number, Email):
             executeCommand(command)
             print("inserted new passenger")
 
-
+def remove_booked_flight(flight_id, passport_num):
+    command = ("""DELETE FROM bookings 
+    WHERE bookings.Flight_ID = '%s' 
+    AND bookings.Passenger_ID IN (SELECT unique(Passenger_ID) from passengers WHERE Passport_Number = '%s')"""
+               % (flight_id, passport_num))
+    return executeCommand(command)
 def get_avaliable_flights(departure_country, arrival_country):
     command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Country,Departure_Time, a2.Airport_Name,a2.Country, Arrival_Time , Airline
     FROM flights 
@@ -38,6 +43,7 @@ def get_avaliable_flights(departure_country, arrival_country):
     inner join airports as a2 on a2.Airport_ID = flights.Arrival_Airport_ID
     Where a1.Country = '%s' AND a2.Country ='%s' AND capacity > 0"""
                % (departure_country, arrival_country))
+    print(command)
     return executeCommand(command)
 
 
@@ -69,18 +75,17 @@ def view_purchased_flights():
 if __name__ == '_main_':
     with app.app_context():
         cursor = mysql.connection.cursor()
-        # command = """
-        #     INSERT INTO bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type)
-        #     VALUES (1,100, '2069-11-28 12:00:00', 'A' ,11 ,'Confirmed','Economy');
-        # """
-        # Uncomment the next command for testing queries
-        # command = """
-        #     Select Passenger_id from Passengers
-        #     where Passport_Number = 'P8460896'
-        # """
 
+        command = """
+             SELECT Flight_Code,a1.Airport_Name, a1.Country,Departure_Time, a2.Airport_Name,a2.Country, Arrival_Time , Airline
+    FROM flights
+    natural join planes
+    inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
+    inner join airports as a2 on a2.Airport_ID = flights.Arrival_Airport_ID
+    Where a1.Country = 'india' AND a2.Country ='australia' 
+         """
+        values = executeCommand(command)
 
         #values = executeCommand(command)
-        values = get_avaliable_flights("UK", "USA")
         print(values)  # For INSERT, this will likely print 0 as no rows are returned
         mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE

@@ -17,7 +17,7 @@ def filtrele():
     global table
     print(Passport_ID)
     if len(Passport_ID) != 0:
-        command = """SELECT Flight_Code,arrivalAirport.Airport_Name, arrivalAirport.Country,Departure_Time, departureAirport.Airport_Name,departureAirport.Country, Arrival_Time , Airline  
+        command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Country,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Country, Arrival_Time , Airline  
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
@@ -299,7 +299,7 @@ class TableSearched:
 
 # take the data
 
-command = """SELECT Flight_Code,arrivalAirport.Airport_Name, arrivalAirport.Country,Departure_Time, departureAirport.Airport_Name,departureAirport.Country, Arrival_Time , Airline
+command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Country,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Country, Arrival_Time , Airline
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
