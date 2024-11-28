@@ -6,7 +6,7 @@ def set_admin_access():
     global admin_access
     admin_access = 1 if admin_access == 0 else 0
 def filtrele():
-    text = personIdTextBox.get("1.0",END)
+    text = personIdTextBox.get("1.0",'end-1c')
     global lst
     global total_columns
     global total_rows
@@ -17,9 +17,13 @@ def filtrele():
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
                          join bookings on flights.Flight_Id = bookings.Flight_Id
-            where bookings.Passenger_ID = """ + text
+                         join passengers on passengers.Passenger_ID = bookings.Passenger_ID
+            where passengers.Passport_Number = '%s'
+            """%text
         with app.app_context():
             lst = executeCommand(command)
+        print(lst)
+        print(command)
         total_rows = len(lst)
         total_columns = len(lst[0])
         table = TableSearched(root,table)
@@ -29,13 +33,13 @@ def biletSatinAl(biletNumarasi):
     seat_row=0
     seat_type = "Economy"
     def insertToTable():
-        passportNumber = personPassportText.get("1.0",END)
-        fname = personNameText.get("1.0",END)
-        lname = personLastNameText.get("1.0",END)
-        phoneNumber = personPhoneNumberText.get("1.0",END)
-        email = personEmailText.get("1.0",END)
-        amount = personPurchaseAmount.get("1.0",END)
-        paymentMethod = personPurchaseType.get("1.0",END)
+        passportNumber = personPassportText.get("1.0",'end-1c')
+        fname = personNameText.get("1.0",'end-1c')
+        lname = personLastNameText.get("1.0",'end-1c')
+        phoneNumber = personPhoneNumberText.get("1.0",'end-1c')
+        email = personEmailText.get("1.0",'end-1c')
+        amount = personPurchaseAmount.get("1.0",'end-1c')
+        paymentMethod = personPurchaseType.get("1.0",'end-1c')
         time = datetime.now()
 
 
@@ -59,27 +63,30 @@ def biletSatinAl(biletNumarasi):
             """%(fname,lname,passportNumber,phoneNumber,email)
             with app.app_context():
                 executeCommand(command)
+                
         
         command = """
         Select Passenger_ID from Passengers 
         where Passport_Number = '%s'
         """%passportNumber
         with app.app_context():
-            personid = executeCommand(command)
+            personid = executeCommand(command)[0][0]
             print("res2 " + str(personid))
 
         command = """
         INSERT INTO Bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type) 
             VALUES (%s, %s, '%s', '%s', %s, '%s', '%s');
         """%(biletNumarasi,personid,time,seat_col,seat_row,"Confirmed",seat_type)
-        
+        with app.app_context():
+            executeCommand(command)
+
         command = """
         Select Booking_id from Bookings 
-        where Flight_ID = '%s' and Passenger_ID= %s
+        where Flight_ID = %s and Passenger_ID= %s
         """%(biletNumarasi,personid)
 
         with app.app_context():
-            booking_id = executeCommand(command)[0][0]
+            booking_id = executeCommand(command)
             print("res3" + str(booking_id))
 
         command = """
@@ -137,9 +144,9 @@ def biletSatinAl(biletNumarasi):
     buyButton = Button(newWindow,text='Satın Al',height=4,command=insertToTable,relief='solid') 
     buyButton.grid(row=1,column=3,rowspan=4)
     
-    seat_col = personSeatColumnTextBox.get("1.0",END)
-    seat_row = personSeatRowTextBox.get("1.0",END)
-    seat_type = personPurchaseType.get("1.0",END)
+    seat_col = personSeatColumnTextBox.get("1.0",'end-1c')
+    seat_row = personSeatRowTextBox.get("1.0",'end-1c')
+    seat_type = personPurchaseType.get("1.0",'end-1c')
 
     return 0
 class ScrolledFrame(tk.Frame):

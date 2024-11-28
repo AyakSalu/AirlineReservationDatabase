@@ -8,6 +8,7 @@ def executeCommand(command):
     cursor.execute(command)
     data = cursor.fetchall()
     cursor.close()
+    mysql.connection.commit()
     return data
 
 def get_next_bookid():
@@ -22,6 +23,7 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'  # Replace with your MySQL username
 app.config['MYSQL_PASSWORD'] = sifre  # Replace with your MySQL password
 app.config['MYSQL_DB'] = 'airlinereservationsystem'  # Your existing schema name
+
 
 mysql = MySQL(app)
 """
@@ -153,12 +155,19 @@ if __name__ == '__main__':
                 INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
                 VALUES ('%s', '%s', '%s', '%s', '%s');
             """%(fname,lname,passportNumber,phoneNumber,email)
-        executeCommand(command)
         command = """
         Select Passenger_ID from Passengers 
         where Passport_Number = '%s'
         """%("p2")
+        text = "P2311557"
+        command = """SELECT flights.Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
+            from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
+                         join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
+                         join planes on planes.Plane_ID = flights.Plane_ID
+                         join bookings on flights.Flight_Id = bookings.Flight_Id
+                         join passengers on passengers.Passenger_ID = bookings.Passenger_ID
+            where passengers.Passport_Number = '%s'"""%text
         print(command)
-        values = executeCommand(command)[0][0]
+        values = executeCommand(command)
         print(values)  # For INSERT, this will likely print 0 as no rows are returned
         mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE
