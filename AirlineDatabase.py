@@ -24,7 +24,7 @@ app.config['MYSQL_PASSWORD'] = sifre  # Replace with your MySQL password
 app.config['MYSQL_DB'] = 'airlinereservationsystem'  # Your existing schema name
 
 mysql = MySQL(app)
-
+"""
 # Helper: Admin check
 def is_admin():
     return session.get("user_role") == "admin"
@@ -117,10 +117,10 @@ def manage_flights():
     if request.method == 'POST':
         data = request.json
         # Add new flight
-        cursor.execute("""
+        cursor.execute(
             INSERT INTO Flights (plane_id, departure_airport_id, arrival_airport_id, departure_time, arrival_time)
             VALUES (%s, %s, %s, %s, %s)
-        """, (data['plane_id'], data['departure_airport_id'], data['arrival_airport_id'], data['departure_time'],
+        , (data['plane_id'], data['departure_airport_id'], data['arrival_airport_id'], data['departure_time'],
               data['arrival_time']))
         mysql.connection.commit()
         return print("Flight added successfully")
@@ -135,7 +135,7 @@ def manage_users():
     cursor.execute("SELECT * FROM Users")
     users = cursor.fetchall()
     return users
-
+"""
 if __name__ == '__main__':
     with app.app_context():
         cursor = mysql.connection.cursor()
@@ -144,11 +144,21 @@ if __name__ == '__main__':
         #     VALUES (1,100, '2069-11-28 12:00:00', 'A' ,11 ,'Confirmed','Economy');
         # """
         # Uncomment the next command for testing queries
+        fname = "a"
+        lname = "b"
+        passportNumber = "P1234"
+        phoneNumber = "1"
+        email = "d"
         command = """
-            Select Passenger_id from Passengers
-            where Passport_Number = 'P8460896'
-        """
-
-        values = executeCommand(command)
+                INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
+                VALUES ('%s', '%s', '%s', '%s', '%s');
+            """%(fname,lname,passportNumber,phoneNumber,email)
+        executeCommand(command)
+        command = """
+        Select Passenger_ID from Passengers 
+        where Passport_Number = '%s'
+        """%("p2")
+        print(command)
+        values = executeCommand(command)[0][0]
         print(values)  # For INSERT, this will likely print 0 as no rows are returned
         mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE

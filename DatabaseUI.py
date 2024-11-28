@@ -1,8 +1,10 @@
 import tkinter as tk
-from tkinter import Label,Tk,Text,Button,END,Toplevel
+from tkinter import Label,Tk,Text,Button,END,Toplevel,Checkbutton
 from AirlineDatabase import executeCommand, app
 from datetime import datetime
-
+def set_admin_access():
+    global admin_access
+    admin_access = 1 if admin_access == 0 else 0
 def filtrele():
     text = personIdTextBox.get("1.0",END)
     global lst
@@ -40,42 +42,50 @@ def biletSatinAl(biletNumarasi):
 
         #ilk önce passanger tablosuna sonra  booking tablosuna sonrada payment tablosuna ekleme yapılmalı
         #aynı pasaport numarasına sahip passanger varsa eklenmiyecek
+        #burdan sonrası çok iyi çalışmıyor
+        print(str(passportNumber) + " passport number")
         command = """
         Select Passenger_id from passengers 
-        where Passport_number = %s
-        """,passportNumber
+        where Passport_number = '%s'
+        """ % passportNumber
         with app.app_context():
             result = executeCommand(command)
-        if len(result) != 0 :
+            print("res1" + str(result))
+        if len(result) == 0 :
+            print("girdik")
             command = """
                 INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
-                VALUES ('%s', '%s', '%s', '%s', '%s')
-            """,fname,lname,passportNumber,phoneNumber,email
+                VALUES ('%s', '%s', '%s', '%s', '%s');
+            """%(fname,lname,passportNumber,phoneNumber,email)
+            with app.app_context():
+                executeCommand(command)
         
         command = """
-        Select Passenger_id from Passengers 
+        Select Passenger_ID from Passengers 
         where Passport_Number = '%s'
-        """,passportNumber
+        """%passportNumber
         with app.app_context():
             personid = executeCommand(command)
+            print("res2 " + str(personid))
 
         command = """
         INSERT INTO Bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type) 
             VALUES (%s, %s, '%s', '%s', %s, '%s', '%s');
-        """,biletNumarasi,personid,time,seat_col,seat_row,"Confirmed",seat_type
+        """%(biletNumarasi,personid,time,seat_col,seat_row,"Confirmed",seat_type)
         
         command = """
         Select Booking_id from Bookings 
-        where Flight_ID = '%s'
-        """,biletNumarasi
+        where Flight_ID = '%s' and Passenger_ID= %s
+        """%(biletNumarasi,personid)
 
         with app.app_context():
-            booking_id = executeCommand(command)
+            booking_id = executeCommand(command)[0][0]
+            print("res3" + str(booking_id))
 
         command = """
-        INSERT INTO Payments (Booking_ID, Amount, Payment_Date, Payment_Method) VALUES 
-        (%s, %s, '%s', '%s');
-        """,booking_id,amount,time,paymentMethod
+        INSERT INTO Payments (Booking_ID, Amount, Payment_Date, Payment_Method) 
+        VALUES (%s, %s, '%s', '%s');
+        """%(booking_id,amount,time,paymentMethod)
         with app.app_context():
             executeCommand(command)
         
@@ -89,7 +99,7 @@ def biletSatinAl(biletNumarasi):
     personPurchaseAmountLabel.grid(sticky='W',row=3,column=1)
     personPurchaseAmount = Text(newWindow,height=1,width=20)
     personPurchaseAmount.grid(sticky='W',row=3,column=2)
-    personPurchaseTypeLabel = Label(newWindow, text = "Ödeme Türü")
+    personPurchaseTypeLabel = Label(newWindow, text = "Ödeme Türü ('Credit Card', 'PayPal' or 'Bank Transfer')")
     personPurchaseTypeLabel.grid(sticky='W',row=4,column=1)
     personPurchaseType = Text(newWindow,height=1,width=20)
     personPurchaseType.grid(sticky='W',row=4,column=2)
@@ -114,7 +124,7 @@ def biletSatinAl(biletNumarasi):
     personLastNameText = Text(newWindow,height=1,width=20)
     personLastNameText.grid(sticky='W',row=7,column=2)
 
-    personPassportTypeLabel = Label(newWindow, text = "Passaport ya da TCKN")
+    personPassportTypeLabel = Label(newWindow, text = "Passaport")
     personPassportTypeLabel.grid(sticky='W',row=8,column=1)
     personPassportText = Text(newWindow,height=1,width=20)
     personPassportText.grid(sticky='W',row=8,column=2)
@@ -275,7 +285,7 @@ with app.app_context():
 # columns in list
 total_rows = len(lst)
 total_columns = len(lst[0])
-
+admin_access = 0
 root = Tk()
 root.title("AirlineManagement")
 root.geometry('1600x700+100+100')
@@ -296,6 +306,10 @@ personIdTextBox.grid(row=1,column=6,columnspan=4)
 searchButton = Button(root,text='Search',command=filtrele)
 searchButton.configure(background='white',foreground='black')
 searchButton.grid(row=1,column=10) 
+
+adminCheckBox = Checkbutton(root,text='Admin Access',command=set_admin_access)
+adminCheckBox.configure(background='white',foreground='black')
+adminCheckBox.grid(row=1,column=11) 
 table = TableInitial(root)
 
 
