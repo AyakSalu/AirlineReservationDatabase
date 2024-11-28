@@ -1,32 +1,46 @@
 import tkinter as tk
-from tkinter import Label,Tk,Text,Button,END,Toplevel,Checkbutton
-from AirlineDatabase import executeCommand, app
+from tkinter import Label,Tk,Text,Button,Toplevel,Checkbutton
+from AirlineDatabase import executeCommand, app,get_avaliable_flights
 from datetime import datetime
+def bilet_iptal_et(flight_id,Passport_ID):
+    return 0
 def set_admin_access():
     global admin_access
     admin_access = 1 if admin_access == 0 else 0
 def filtrele():
-    text = personIdTextBox.get("1.0",'end-1c')
+    Passport_ID = personIdTextBox.get("1.0",'end-1c')
+    arrivalCity = arrivalCityTextBox.get("1.0",'end-1c')
+    departureCity = departureCityTextBox.get("1.0",'end-1c')
     global lst
     global total_columns
     global total_rows
     global table
-    if text is not None:
-        command = """SELECT flights.Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
+    print(Passport_ID)
+    if len(Passport_ID) != 0:
+        command = """SELECT Flight_Code,arrivalAirport.Airport_Name, arrivalAirport.Country,Departure_Time, departureAirport.Airport_Name,departureAirport.Country, Arrival_Time , Airline  
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
                          join bookings on flights.Flight_Id = bookings.Flight_Id
                          join passengers on passengers.Passenger_ID = bookings.Passenger_ID
             where passengers.Passport_Number = '%s'
-            """%text
+            """%Passport_ID
         with app.app_context():
             lst = executeCommand(command)
         print(lst)
         print(command)
         total_rows = len(lst)
         total_columns = len(lst[0])
-        table = TableSearched(root,table)
+        table = TableSearched(root,table,1)
+        
+    elif len(arrivalCity) and len(departureCity):
+        print(arrivalCity)
+        print(departureCity)
+        lst = get_avaliable_flights(departureCity,arrivalCity)
+        print(lst)
+        total_rows = len(lst)
+        total_columns = len(lst[0])
+        table = TableSearched(root,table,0)
     return 0
 def biletSatinAl(biletNumarasi):
     
@@ -146,51 +160,8 @@ def biletSatinAl(biletNumarasi):
     buyButton = Button(newWindow,text='Satın Al',height=4,command=insertToTable,relief='solid') 
     buyButton.grid(row=1,column=3,rowspan=4)
     
-    seat_col = personSeatColumnTextBox.get("1.0",'end-1c')
-    seat_row = personSeatRowTextBox.get("1.0",'end-1c')
-    seat_type = personPurchaseType.get("1.0",'end-1c')
 
     return 0
-class ScrolledFrame(tk.Frame):
-
-    def __init__(self, parent, vertical=True, horizontal=False):
-        super().__init__(parent)
-
-        # canvas for inner frame
-        self._canvas = tk.Canvas(self)
-        self._canvas.grid(row=0, column=0, sticky='news') # changed
-
-        # create right scrollbar and connect to canvas Y
-        self._vertical_bar = tk.Scrollbar(self, orient='vertical', command=self._canvas.yview)
-        if vertical:
-            self._vertical_bar.grid(row=0, column=1, sticky='ns')
-        self._canvas.configure(yscrollcommand=self._vertical_bar.set)
-
-        # create bottom scrollbar and connect to canvas X
-        self._horizontal_bar = tk.Scrollbar(self, orient='horizontal', command=self._canvas.xview)
-        if horizontal:
-            self._horizontal_bar.grid(row=1, column=0, sticky='we')
-        self._canvas.configure(xscrollcommand=self._horizontal_bar.set)
-
-        # inner frame for widgets
-        self.inner = tk.Frame(self._canvas, bg='red')
-        self._window = self._canvas.create_window((0, 0), window=self.inner, anchor='nw')
-
-        # autoresize inner frame
-        self.columnconfigure(0, weight=1) # changed
-        self.rowconfigure(0, weight=1) # changed
-
-        # resize when configure changed
-        self.inner.bind('<Configure>', self.resize)
-        self._canvas.bind('<Configure>', self.frame_width)
-
-    def frame_width(self, event):
-        # resize inner frame to canvas size
-        canvas_width = event.width
-        self._canvas.itemconfig(self._window, width = canvas_width)
-
-    def resize(self, event=None): 
-        self._canvas.configure(scrollregion=self._canvas.bbox('all'))
 class TableInitial:
     Labels = list()
     
@@ -199,26 +170,47 @@ class TableInitial:
             for label in self.Labels:
                 label.grid_remove()
         resetTable(self)
-        self.e = Label(root, text="Flight_Id",width=18, fg='black',borderwidth=1,relief='solid',
+        self.e = Label(root, text="Flight_Code",width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.configure(background='white')
-        self.e.grid(row=2, column=3)
-        self.Labels.append(self.e)  
-        self.e = Label(root,text="Arrival Airport", width=18, fg='black',borderwidth=1,relief='solid',
-                               font=('Arial',8))
-        self.e.configure(background='white')
-        self.e.grid(row=2, column=4)
+        self.e.grid(row=5, column=3)
         self.Labels.append(self.e)  
         self.e = Label(root,text="Departure Airport", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.configure(background='white')
-        self.e.grid(row=2, column=5)
+        self.e.grid(row=5, column=4)
         self.Labels.append(self.e)  
-        self.e = Label(root,text="Airline", width=18, fg='black',borderwidth=1,relief='solid',
+        self.e = Label(root,text="Departure City", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.configure(background='white')
-        self.e.grid(row=2, column=6)
+        self.e.grid(row=5, column=5)
         self.Labels.append(self.e)  
+        self.e = Label(root,text="Departure Time", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.configure(background='white')
+        self.e.grid(row=5, column=6)
+        self.Labels.append(self.e)  
+        self.e = Label(root,text="Arrival Airport", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=7)
+        self.e.configure(background='white')
+        self.Labels.append(self.e) 
+        self.e = Label(root,text="Arrival City", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=8)
+        self.e.configure(background='white')
+        self.Labels.append(self.e)
+        self.e = Label(root,text="Arrival Time", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=9)
+        self.e.configure(background='white')
+        self.Labels.append(self.e)
+        self.e = Label(root,text="Airline", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=10)
+        self.e.configure(background='white')
+        self.Labels.append(self.e) 
+
         # code for creating table
         for i in range(total_rows):
             for j in range(total_columns):
@@ -231,39 +223,59 @@ class TableInitial:
                                font=('Arial',8))
                 self.Labels.append(self.e)    
                 self.e.configure(background='white')        
-                self.e.grid(row=i+3, column=j+3)
+                self.e.grid(row=i+6, column=j+3)
             self.e = Button(root,text='Satın Al',command=lambda : biletSatinAl(lst[i][0]),padx=0, pady=0,width=40, height=11,compound="center",
                        image=pixel)
             self.Labels.append(self.e)
-            self.e.grid(row=i+3, column=j+4)
+            self.e.grid(row=i+6, column=j+4)
             self.e.configure(background='white')
 class TableSearched:
     Labels = list()
-    def __init__(self,root,table):
+    def __init__(self,root,table,flag):
         def resetTable(table):
             for label in table.Labels:
                 label.grid_remove()
         resetTable(table)
-        self.e = Label(root, text="Flight_Id",width=18, fg='black',borderwidth=1,relief='solid',
+        self.e = Label(root, text="Flight_Code",width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
-        
-        self.e.grid(sticky='W',row=2, column=3)
         self.e.configure(background='white')
-        self.e = Label(root,text="Arrival Airport", width=18, fg='black',borderwidth=1,relief='solid',
-                               font=('Arial',8))
-        self.e.grid(sticky='W',row=2, column=4)
-        self.e.configure(background='white')
+        self.e.grid(row=5, column=3)
         self.Labels.append(self.e)  
         self.e = Label(root,text="Departure Airport", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
-        self.e.grid(sticky='W',row=2, column=5)
         self.e.configure(background='white')
+        self.e.grid(row=5, column=4)
         self.Labels.append(self.e)  
+        self.e = Label(root,text="Departure City", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.configure(background='white')
+        self.e.grid(row=5, column=5)
+        self.Labels.append(self.e)  
+        self.e = Label(root,text="Departure Time", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.configure(background='white')
+        self.e.grid(row=5, column=6)
+        self.Labels.append(self.e)  
+        self.e = Label(root,text="Arrival Airport", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=7)
+        self.e.configure(background='white')
+        self.Labels.append(self.e) 
+        self.e = Label(root,text="Arrival City", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=8)
+        self.e.configure(background='white')
+        self.Labels.append(self.e)
+        self.e = Label(root,text="Arrival Time", width=18, fg='black',borderwidth=1,relief='solid',
+                               font=('Arial',8))
+        self.e.grid(sticky='W',row=5, column=9)
+        self.e.configure(background='white')
+        self.Labels.append(self.e)
         self.e = Label(root,text="Airline", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
-        self.e.grid(sticky='W',row=2, column=6)
+        self.e.grid(sticky='W',row=5, column=10)
         self.e.configure(background='white')
-        self.Labels.append(self.e)  
+        self.Labels.append(self.e) 
         # code for creating table
         for i in range(total_rows):
             for j in range(total_columns):
@@ -275,12 +287,19 @@ class TableSearched:
                 self.e = Label(root,text=text ,width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
                 self.Labels.append(self.e)            
-                self.e.grid(sticky='W',row=i+3, column=j+3)
+                self.e.grid(sticky='W',row=i+6, column=j+3)
+                self.e.configure(background='white')
+            if flag == 1: 
+                self.e = Button(root,text='İptal Et',command=lambda : bilet_iptal_et(lst[i][0],personIdTextBox.get("1.0",'end-1c')),padx=0, pady=0,width=40, height=11,compound="center",
+                           image=pixel)
+                self.Labels.append(self.e)
+                self.e.grid(row=i+6, column=j+4)
                 self.e.configure(background='white')
   
 
 # take the data
-command = """SELECT Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airport_Name ,Airline  
+
+command = """SELECT Flight_Code,arrivalAirport.Airport_Name, arrivalAirport.Country,Departure_Time, departureAirport.Airport_Name,departureAirport.Country, Arrival_Time , Airline
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
@@ -289,7 +308,6 @@ command = """SELECT Flight_Id,arrivalAirport.Airport_Name,departureAirport.Airpo
 
 with app.app_context():
     lst = executeCommand(command)
-    lst += executeCommand(command)
 # find total number of rows and
 # columns in list
 total_rows = len(lst)
@@ -309,16 +327,29 @@ personIdTextBoxLabel.configure(background='white',foreground='black')
 personIdTextBoxLabel.grid(sticky='W',row=1,column=1,columnspan=5) 
 personIdTextBox = Text(root,height=1,width=20,borderwidth=1)
 personIdTextBox.configure(background='white',foreground='black')
-personIdTextBox.grid(row=1,column=6,columnspan=4) 
+personIdTextBox.grid(row=1,column=5,columnspan=4) 
 
+arrivalCityLabel = Label(root, text = "Varmak istediğiniz şehri giriniz")
+arrivalCityLabel.configure(background='white',foreground='black')
+arrivalCityLabel.grid(sticky='W',row=2,column=0,columnspan=5) 
+arrivalCityTextBox = Text(root,height=1,width=20,borderwidth=1)
+arrivalCityTextBox.configure(background='white',foreground='black')
+arrivalCityTextBox.grid(row=2,column=3,columnspan=4) 
+
+departureCityLabel = Label(root, text = "Kalkışa geçmek istediğiniz şehri giriniz")
+departureCityLabel.configure(background='white',foreground='black')
+departureCityLabel.grid(sticky='W',row=2,column=5,columnspan=3) 
+departureCityTextBox = Text(root,height=1,width=15,borderwidth=1)
+departureCityTextBox.configure(background='white',foreground='black')
+departureCityTextBox.grid(sticky='E',row=2,column=7) 
 
 searchButton = Button(root,text='Search',command=filtrele)
 searchButton.configure(background='white',foreground='black')
-searchButton.grid(row=1,column=10) 
+searchButton.grid(row=1,column=7) 
 
 adminCheckBox = Checkbutton(root,text='Admin Access',command=set_admin_access)
 adminCheckBox.configure(background='white',foreground='black')
-adminCheckBox.grid(row=1,column=11) 
+adminCheckBox.grid(row=1,column=8) 
 table = TableInitial(root)
 
 
