@@ -5,7 +5,7 @@ from datetime import datetime
 maxBookingIdCommand = """SELECT max(Booking_ID)  
             from bookings 
             """ 
-next_booking_id = executeCommand(maxBookingIdCommand)
+next_booking_id = executeCommand(maxBookingIdCommand) + 1
 def filtrele():
     text = personIdTextBox.get("1.0",END)
     global lst
@@ -33,6 +33,9 @@ def biletSatinAl(biletNumarasi):
         command = """
         INSERT INTO bookings (%s, %s, %s, %s,%s,%s,%s,%s)
         """,next_booking_id,biletNumarasi,datetime.now(),seat_col,seat_row,"Occupied",seat_type
+        next_booking_id += 1
+
+        executeCommand(command)
         
     newWindow = Toplevel(root)
     newWindow.title("Purchase screen")
@@ -57,7 +60,10 @@ def biletSatinAl(biletNumarasi):
     buyButton = Button(newWindow,text='Satın Al',height=4,command=insertToTable,relief='solid') 
     buyButton.grid(row=1,column=3,rowspan=4)
     
-    
+    seat_col = personSeatColumnTextBox.get("1.0",END)
+    seat_row = personSeatRowTextBox.get("1.0",END)
+    seat_type = personPurchaseType.get("1.0",END)
+
     return 0
 class ScrolledFrame(tk.Frame):
 
