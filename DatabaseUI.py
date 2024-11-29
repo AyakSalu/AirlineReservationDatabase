@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import Label, Tk, Text, Button, Toplevel, Checkbutton, ttk, Frame
-from AirlineDatabase import executeCommand, app, get_avaliable_flights, remove_booked_flight, get_flight_id
+from AirlineDatabase import executeCommand, app, get_avaliable_flights, remove_booked_flight, get_flight_id,check_booking_availability
 from datetime import datetime
+import tkinter.messagebox
 
 
 def bilet_iptal_et(flight_id, Passport_ID):
@@ -36,14 +37,16 @@ def filtrele():
         print(lst)
         print(command)
         total_rows = len(lst)
-        total_columns = len(lst[0])
-
+        try :
+            total_columns = len(lst[0])
+        except IndexError:
+            total_columns=0
         table = TableSearched(tablo, table, 1)
         tablo.grid(row=10, column=1, columnspan=100, rowspan=100)
 
         # table = TableSearched(root,table,1)
 
-    elif len(arrivalCity) and len(departureCity):
+    elif len(arrivalCity) != 0 and len(departureCity) != 0:
         print(arrivalCity)
         print(departureCity)
         lst = get_avaliable_flights(departureCity, arrivalCity)
@@ -86,61 +89,58 @@ def biletSatinAl(biletNumarasi):
         email = personEmailText.get("1.0", 'end-1c')
         amount = personPurchaseAmount.get("1.0", 'end-1c')
         paymentMethod = personPurchaseType.get()
-        print("%s %s %s %s %s %s %s " % (passportNumber, fname, lname, phoneNumber, email, amount, paymentMethod))
-        time = datetime.now()
-
-        # ilk önce passanger tablosuna sonra  booking tablosuna sonrada payment tablosuna ekleme yapılmalı
-        # aynı pasaport numarasına sahip passanger varsa eklenmiyecek
-        # burdan sonrası çok iyi çalışmıyor
-        print(str(passportNumber) + " passport number")
-        command = """
-        Select Passenger_id from passengers 
-        where Passport_number = '%s'
-        """ % passportNumber
-        with app.app_context():
-            result = executeCommand(command)
-            print("res1" + str(result))
-        if len(result) == 0:
-            print("girdik")
+        if check_booking_availability(biletNumarasi,seat_row,seat_col,passportNumber) and len(seat_col) != 0 and len(seat_row) != 0 and len(seat_type) != 0 and len(passportNumber) != 0 and len(fname) != 0 and len(lname) != 0 and len(phoneNumber) != 0 and len(email) != 0 and len(amount) != 0 and len(paymentMethod) != 0:
+            print("%s %s %s %s %s %s %s " % (passportNumber, fname, lname, phoneNumber, email, amount, paymentMethod))
+            time = datetime.now()
+            # ilk önce passanger tablosuna sonra  booking tablosuna sonrada payment tablosuna ekleme yapılmalı
+            # aynı pasaport numarasına sahip passanger varsa eklenmiyecek
+            # burdan sonrası çok iyi çalışmıyor
+            print(str(passportNumber) + " passport number")
             command = """
-                INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
-                VALUES ('%s', '%s', '%s', '%s', '%s');
-            """ % (fname, lname, passportNumber, phoneNumber, email)
+            Select Passenger_id from passengers 
+            where Passport_number = '%s'
+            """ % passportNumber
+            with app.app_context():
+                result = executeCommand(command)
+                print("res1" + str(result))
+            if len(result) == 0:
+                print("girdik")
+                command = """
+                    INSERT INTO Passengers (Fname, Lname, Passport_Number, Phone_Number, Email) 
+                    VALUES ('%s', '%s', '%s', '%s', '%s');
+                """ % (fname, lname, passportNumber, phoneNumber, email)
+                with app.app_context():
+                    executeCommand(command)
+            command = """
+            Select Passenger_ID from Passengers 
+            where Passport_Number = '%s'
+            """ % passportNumber
+            with app.app_context():
+                personid = executeCommand(command)[0][0]
+                print("res2 " + str(personid))
+            command = """
+            INSERT INTO Bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type) 
+                VALUES (%s, %s, '%s', '%s', %s, '%s', '%s');
+            """ % (biletNumarasi, personid, time, seat_col, seat_row, "Confirmed", seat_type)
+            with app.app_context():
+                print(command)
+                executeCommand(command)
+            command = """
+            Select Booking_id from Bookings 
+            where Flight_ID = %s and Passenger_ID= %s
+            """ % (biletNumarasi, personid)
+            with app.app_context():
+                booking_id = executeCommand(command)[0][0]
+                print("res3" + str(booking_id))
+            command = """
+            INSERT INTO Payments (Booking_ID, Amount, Payment_Date, Payment_Method) 
+            VALUES (%s, %s, '%s', '%s');
+            """ % (booking_id, amount, time, paymentMethod)
             with app.app_context():
                 executeCommand(command)
-
-        command = """
-        Select Passenger_ID from Passengers 
-        where Passport_Number = '%s'
-        """ % passportNumber
-        with app.app_context():
-            personid = executeCommand(command)[0][0]
-            print("res2 " + str(personid))
-
-        command = """
-        INSERT INTO Bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type) 
-            VALUES (%s, %s, '%s', '%s', %s, '%s', '%s');
-        """ % (biletNumarasi, personid, time, seat_col, seat_row, "Confirmed", seat_type)
-        with app.app_context():
-            print(command)
-            executeCommand(command)
-
-        command = """
-        Select Booking_id from Bookings 
-        where Flight_ID = %s and Passenger_ID= %s
-        """ % (biletNumarasi, personid)
-
-        with app.app_context():
-            booking_id = executeCommand(command)[0][0]
-            print("res3" + str(booking_id))
-
-        command = """
-        INSERT INTO Payments (Booking_ID, Amount, Payment_Date, Payment_Method) 
-        VALUES (%s, %s, '%s', '%s');
-        """ % (booking_id, amount, time, paymentMethod)
-        with app.app_context():
-            executeCommand(command)
-
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Seçtiğiniz koltuk uygun değil ya da Girdiğiniz bilgiler hatalı")
     newWindow = Toplevel(root)
     newWindow.title("Purchase screen")
     personSeatRow = Label(newWindow, text="Satın Almak İstediğiniz Koltuğun Sırası")
