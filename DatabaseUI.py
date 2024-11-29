@@ -256,7 +256,7 @@ class TableInitial:
                 self.Labels.append(self.e)
                 self.e.configure(background='white')
                 self.e.grid(row=i + 6, column=j + 3)
-            self.e = Button(root, text='Satın Al', command= lambda a = i: get_flight_id(lst[a][0]), padx=0, pady=0, width=40,
+            self.e = Button(root, text='Satın Al', command= lambda a = i: biletSatinAl(get_flight_id(lst[a][0])), padx=0, pady=0, width=40,
                             height=11, compound="center",
                             image=pixel)
             self.Labels.append(self.e)
