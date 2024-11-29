@@ -53,9 +53,9 @@ def check_booking_availability(flight_id, seat_row, seat_col, passenger_id):
 
 
 def remove_booked_flight(flight_id, passport_num):
-    command = ("""DELETE FROM bookings 
-    WHERE bookings.Flight_ID = '%s' 
-    AND bookings.Passenger_ID IN (SELECT unique(Passenger_ID) from passengers WHERE Passport_Number = '%s')"""
+    command = ("""DELETE FROM bookings
+    WHERE bookings.Flight_ID = '%s'
+    AND bookings.Passenger_ID IN (Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s')"""
                % (flight_id, passport_num))
     return executeCommand(command)
 
@@ -110,13 +110,13 @@ if __name__ == '__main__':
         # AND bookings.Passenger_ID IN  """ % (30, 123))
         # command = """ Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s' """ % (123)
 
-    #     command = ("""Delete FROM bookings
-    # WHERE bookings.Flight_ID = '%s'
-    # AND bookings.Passenger_ID IN (Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s')"""
-    #                % (30, 123))
+        command = ("""SELECT * FROM bookings
+    WHERE bookings.Flight_ID = '%s'
+    AND bookings.Passenger_ID IN (Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s')"""
+                   % (30, 123))
         # command = """ (SELECT unique(Passenger_ID) from passengers WHERE Passport_Number = '%s') """ % (123)
-        # print(executeCommand(command))
+        print(executeCommand(command))
 
-        print(check_booking_availability(30, 1000, 'Z', 104))
+        #print(check_booking_availability(30, 1000, 'Z', 104))
         # print(remove_booked_flight(30, 123))
         # mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE

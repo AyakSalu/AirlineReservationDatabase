@@ -256,16 +256,12 @@ class TableInitial:
                 self.Labels.append(self.e)
                 self.e.configure(background='white')
                 self.e.grid(row=i + 6, column=j + 3)
-            flight_code = lst[i][0]
-            flight_id = get_flight_id(flight_code)
-            self.e = Button(root, text='Satın Al', command=lambda: biletSatinAl(flight_id), padx=0, pady=0, width=40,
+            self.e = Button(root, text='Satın Al', command= lambda a = i: get_flight_id(lst[a][0]), padx=0, pady=0, width=40,
                             height=11, compound="center",
                             image=pixel)
             self.Labels.append(self.e)
             self.e.grid(row=i + 6, column=j + 4)
             self.e.configure(background='white')
-
-
 class TableSearched:
     Labels = list()
 
@@ -330,7 +326,7 @@ class TableSearched:
                 self.e.configure(background='white')
             if flag == 1:
                 self.e = Button(root, text='İptal Et',
-                                command=lambda: bilet_iptal_et(lst[i][0], personIdTextBox.get("1.0", 'end-1c')), padx=0,
+                                command=lambda a = i: bilet_iptal_et(lst[a][0], personIdTextBox.get("1.0", 'end-1c')), padx=0,
                                 pady=0, width=40, height=11, compound="center",
                                 image=pixel)
                 self.Labels.append(self.e)
