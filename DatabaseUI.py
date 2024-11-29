@@ -326,7 +326,7 @@ class TableSearched:
                 self.e.configure(background='white')
             if flag == 1:
                 self.e = Button(root, text='İptal Et',
-                                command=lambda a = i: bilet_iptal_et(lst[a][0], personIdTextBox.get("1.0", 'end-1c')), padx=0,
+                                command=lambda a = i: bilet_iptal_et(get_flight_id(lst[a][0]), personIdTextBox.get("1.0", 'end-1c')), padx=0,
                                 pady=0, width=40, height=11, compound="center",
                                 image=pixel)
                 self.Labels.append(self.e)
