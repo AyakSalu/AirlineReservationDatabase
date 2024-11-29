@@ -1,9 +1,9 @@
 import tkinter as tk
-from tkinter import Label,Tk,Text,Button,Toplevel,Checkbutton
-from AirlineDatabase import executeCommand, app,get_avaliable_flights
+from tkinter import Label,Tk,Text,Button,Toplevel,Checkbutton,ttk,Frame
+from AirlineDatabase import executeCommand, app,get_avaliable_flights,remove_booked_flight,get_flight_id
 from datetime import datetime
 def bilet_iptal_et(flight_id,Passport_ID):
-    return 0
+    return remove_booked_flight(flight_id,Passport_ID) 
 def set_admin_access():
     global admin_access
     admin_access = 1 if admin_access == 0 else 0
@@ -31,7 +31,11 @@ def filtrele():
         print(command)
         total_rows = len(lst)
         total_columns = len(lst[0])
-        table = TableSearched(root,table,1)
+
+        table = TableSearched(tablo,table,1)
+        tablo.grid(row=10,column=1,columnspan=100,rowspan=100)
+
+        #table = TableSearched(root,table,1)
         
     elif len(arrivalCity) and len(departureCity):
         print(arrivalCity)
@@ -40,8 +44,30 @@ def filtrele():
         print(lst)
         total_rows = len(lst)
         total_columns = len(lst[0])
-        table = TableSearched(root,table,0)
-    return 0
+
+        table = TableSearched(tablo,table,0)
+        tablo.grid(row=10,column=1,columnspan=100,rowspan=100)
+
+        #table = TableSearched(root,table,0)
+        #tablo.grid(row=10,column=1,columnspan=100,rowspan=100)
+    else:
+        command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Country,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Country, Arrival_Time , Airline
+            from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
+                         join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
+                         join planes on planes.Plane_ID = flights.Plane_ID
+                         
+            """
+        with app.app_context():
+            lst = executeCommand(command)
+        # find total number of rows and
+        # columns in list
+        total_rows = len(lst)
+        total_columns = len(lst[0])
+        table = TableInitial(tablo)
+        tablo.grid(row=10,column=1,columnspan=100,rowspan=100)
+        return 0
+    
+    
 def biletSatinAl(biletNumarasi):
     
     def insertToTable():
@@ -54,7 +80,7 @@ def biletSatinAl(biletNumarasi):
         phoneNumber = personPhoneNumberText.get("1.0",'end-1c')
         email = personEmailText.get("1.0",'end-1c')
         amount = personPurchaseAmount.get("1.0",'end-1c')
-        paymentMethod = personPurchaseType.get("1.0",'end-1c')
+        paymentMethod = personPurchaseType.get()
         print("%s %s %s %s %s %s %s "%(passportNumber,fname,lname,phoneNumber,email,amount,paymentMethod))
         time = datetime.now()
 
@@ -124,8 +150,9 @@ def biletSatinAl(biletNumarasi):
     personPurchaseAmount.grid(sticky='W',row=3,column=2)
     personPurchaseTypeLabel = Label(newWindow, text = "Ödeme Türü ('Credit Card', 'PayPal' or 'Bank Transfer')")
     personPurchaseTypeLabel.grid(sticky='W',row=4,column=1)
-    personPurchaseType = Text(newWindow,height=1,width=20)
-    personPurchaseType.grid(sticky='W',row=4,column=2)
+    personPurchaseType = ttk.Combobox(newWindow,height=3,width=15)
+    personPurchaseType['values'] = ('Credit Card','PayPal','Bank Transfer')
+    personPurchaseType.grid(sticky='W',row=4,column=2,columnspan=2)
     personSeatRowTextBox = Text(newWindow,height=1,width=20)
     personSeatRowTextBox.grid(row=1,column=2) 
 
@@ -158,7 +185,7 @@ def biletSatinAl(biletNumarasi):
     personPhoneNumberText.grid(sticky='W',row=9,column=2)
 
     buyButton = Button(newWindow,text='Satın Al',height=4,command=insertToTable,relief='solid') 
-    buyButton.grid(row=1,column=3,rowspan=4)
+    buyButton.grid(row=1,column=4,rowspan=4)
     
 
     return 0
@@ -180,7 +207,7 @@ class TableInitial:
         self.e.configure(background='white')
         self.e.grid(row=5, column=4)
         self.Labels.append(self.e)  
-        self.e = Label(root,text="Departure City", width=18, fg='black',borderwidth=1,relief='solid',
+        self.e = Label(root,text="Departure Location", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.configure(background='white')
         self.e.grid(row=5, column=5)
@@ -195,7 +222,7 @@ class TableInitial:
         self.e.grid(sticky='W',row=5, column=7)
         self.e.configure(background='white')
         self.Labels.append(self.e) 
-        self.e = Label(root,text="Arrival City", width=18, fg='black',borderwidth=1,relief='solid',
+        self.e = Label(root,text="Arrival Location", width=18, fg='black',borderwidth=1,relief='solid',
                                font=('Arial',8))
         self.e.grid(sticky='W',row=5, column=8)
         self.e.configure(background='white')
@@ -224,7 +251,8 @@ class TableInitial:
                 self.Labels.append(self.e)    
                 self.e.configure(background='white')        
                 self.e.grid(row=i+6, column=j+3)
-            self.e = Button(root,text='Satın Al',command=lambda : biletSatinAl(lst[i][0]),padx=0, pady=0,width=40, height=11,compound="center",
+            flight_id = get_flight_id()
+            self.e = Button(root,text='Satın Al',command=lambda : biletSatinAl(flight_id),padx=0, pady=0,width=40, height=11,compound="center",
                        image=pixel)
             self.Labels.append(self.e)
             self.e.grid(row=i+6, column=j+4)
@@ -322,36 +350,37 @@ pixel = tk.PhotoImage(width=1, height=1)
 #window.pack(side = 'left',expand=True, fill='both')
 
 
-personIdTextBoxLabel = Label(root, text = "Biletlerinizi görmek ya da bilet almak için Passaport Numaranızı giriniz")
+personIdTextBoxLabel = Label(root, text = "Biletlerinizi görmek için Passaport Numaranızı giriniz")
 personIdTextBoxLabel.configure(background='white',foreground='black')
-personIdTextBoxLabel.grid(sticky='W',row=1,column=1,columnspan=5) 
+personIdTextBoxLabel.grid(sticky='W',row=1,column=1,columnspan=6) 
 personIdTextBox = Text(root,height=1,width=20,borderwidth=1)
 personIdTextBox.configure(background='white',foreground='black')
-personIdTextBox.grid(row=1,column=5,columnspan=4) 
+personIdTextBox.grid(row=1,column=7,columnspan=4) 
 
-arrivalCityLabel = Label(root, text = "Varmak istediğiniz şehri giriniz")
+arrivalCityLabel = Label(root, text = "Varış Ülkesi")
 arrivalCityLabel.configure(background='white',foreground='black')
 arrivalCityLabel.grid(sticky='W',row=2,column=0,columnspan=5) 
 arrivalCityTextBox = Text(root,height=1,width=20,borderwidth=1)
 arrivalCityTextBox.configure(background='white',foreground='black')
-arrivalCityTextBox.grid(row=2,column=3,columnspan=4) 
+arrivalCityTextBox.grid(row=2,column=3,columnspan=3) 
 
-departureCityLabel = Label(root, text = "Kalkışa geçmek istediğiniz şehri giriniz")
+departureCityLabel = Label(root, text = "Kalkış Ülkesi")
 departureCityLabel.configure(background='white',foreground='black')
-departureCityLabel.grid(sticky='W',row=2,column=5,columnspan=3) 
+departureCityLabel.grid(sticky='W',row=2,column=7,columnspan=3) 
 departureCityTextBox = Text(root,height=1,width=15,borderwidth=1)
 departureCityTextBox.configure(background='white',foreground='black')
-departureCityTextBox.grid(sticky='E',row=2,column=7) 
+departureCityTextBox.grid(sticky='E',row=2,column=10) 
 
 searchButton = Button(root,text='Search',command=filtrele)
-searchButton.configure(background='white',foreground='black')
-searchButton.grid(row=1,column=7) 
+searchButton.configure(background='white',foreground='black',)
+searchButton.grid(row=1,column=11) 
 
 adminCheckBox = Checkbutton(root,text='Admin Access',command=set_admin_access)
 adminCheckBox.configure(background='white',foreground='black')
-adminCheckBox.grid(row=1,column=8) 
-table = TableInitial(root)
-
+adminCheckBox.grid(row=1,column=12)
+tablo = Frame(root)
+table = TableInitial(tablo)
+tablo.grid(row=10,column=1,columnspan=100,rowspan=100)
 
 root.mainloop()
 

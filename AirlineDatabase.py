@@ -2,7 +2,8 @@ from flask_mysqldb import MySQL
 from flask import Flask
 from Sifreler import sifre
 
-
+def get_flight_id():
+    return 0
 def executeCommand(command):
     with app.app_context():
         cursor = mysql.connection.cursor()
@@ -36,7 +37,7 @@ def remove_booked_flight(flight_id, passport_num):
                % (flight_id, passport_num))
     return executeCommand(command)
 def get_avaliable_flights(departure_country, arrival_country):
-    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time
+    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time,Airline
     FROM flights 
     natural join planes
     inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
