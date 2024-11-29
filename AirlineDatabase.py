@@ -2,8 +2,7 @@ from flask_mysqldb import MySQL
 from flask import Flask
 from Sifreler import sifre
 
-def get_flight_id():
-    return 0
+
 def executeCommand(command):
     with app.app_context():
         cursor = mysql.connection.cursor()
@@ -30,21 +29,15 @@ def insert_passengers(Fname, Lname, Passport_Number, Phone_Number, Email):
             executeCommand(command)
             print("inserted new passenger")
 
-def remove_booked_flight(flight_id, passport_num):
-    command = ("""DELETE FROM bookings 
-    WHERE bookings.Flight_ID = '%s' 
-    AND bookings.Passenger_ID IN (SELECT unique(Passenger_ID) from passengers WHERE Passport_Number = '%s')"""
-               % (flight_id, passport_num))
-    return executeCommand(command)
+
 def get_avaliable_flights(departure_country, arrival_country):
-    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time,Airline
+    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time
     FROM flights 
     natural join planes
     inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
     inner join airports as a2 on a2.Airport_ID = flights.Arrival_Airport_ID
     Where a1.Country = '%s' AND a2.Country ='%s' AND capacity > 0"""
                % (departure_country, arrival_country))
-    print(command)
     return executeCommand(command)
 
 def remove_booked_flight(flight_id, passport_num):
@@ -76,24 +69,30 @@ user_id = -1
 def is_admin():
     return user_id == -1
 
-def view_purchased_flights():
-    command = """SELECT * FROM bookings WHERE Purchased_Flights"""
-
+def get_flight_id(flight_code):
+    command = (""" SELECT flights.Flight_ID from flights where flights.Flight_Code = '%s' """ % (flight_code))
+    return executeCommand(command)[0][0] #id'yi int olarak döner
 
 if __name__ == '__main__':
     with app.app_context():
-        cursor = mysql.connection.cursor()
-
+        #cursor = mysql.connection.cursor()
         command = """
-             SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time , Airline
-    FROM flights
-    natural join planes
-    inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
-    inner join airports as a2 on a2.Airport_ID = flights.Arrival_Airport_ID
-    Where a1.Country = 'india' AND a2.Country ='australia' 
-         """
-        values = executeCommand(command)
+            INSERT INTO bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type)
+            VALUES (1,100, '2069-11-28 12:00:00', 'A' ,11 ,'Confirmed','Economy');
+        """
+        # Uncomment the next command for testing queries
+        command = """
+            Select Passenger_id from Passengers
+            where Passport_Number = 'P8460896'
+        """
+
+
 
         #values = executeCommand(command)
-        print(values)  # For INSERT, this will likely print 0 as no rows are returned
-        mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE
+        #values = get_avaliable_flights("India", "Australia")
+        #print(values)  # For INSERT, this will likely print 0 as no rows are returned
+
+        command = (""" SELECT flights.Flight_ID from flights where flights.Flight_Code = '%s' """ % ("FC6566"))
+        print(executeCommand(command))
+        print(get_flight_id("FC6566"))
+        #mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE
