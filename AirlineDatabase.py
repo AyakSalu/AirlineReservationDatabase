@@ -1,7 +1,7 @@
 from flask_mysqldb import MySQL
 from flask import Flask
 from Sifreler import sifre
-
+from datetime import datetime
 
 def executeCommand(command):
     with app.app_context():
@@ -123,6 +123,19 @@ def get_airport(airport_name):
     result = executeCommand(command)
     return result[0][0] if len(result) > 0 else -1
 
+def compare_dates(departure_date, arrival_date):
+
+    # Parse the strings into datetime objects
+    datetime1 = datetime.strptime(departure_date, '%Y-%m-%d %H:%M:%S')
+    datetime2 = datetime.strptime(arrival_date, '%Y-%m-%d %H:%M:%S')
+
+    # Extract the time portion
+    time1 = datetime1.time()
+    time2 = datetime2.time()
+
+    #arrival_time > deprature olursa true döner
+    return time2 > time1
+
 
 def add_flight(plane_id, departure_airport_name, arrival_airport_name, departure_time, arrival_time, flight_code,
                brand=None):
@@ -132,6 +145,9 @@ def add_flight(plane_id, departure_airport_name, arrival_airport_name, departure
     if (departure_airport == -1 or arrival_airport == -1):
         print("öyle bir airportlar yok ya da yanlış yazıldı")
         return -1
+    if(not compare_dates(departure_time,arrival_time)):
+        print("varma zamanı, kalkma zamanından önce olamaz")
+
 
     if brand != None:
         command = """ INSERT INTO airlinereservationsystem.flights (Plane_ID, Departure_Airport_ID, Arrival_Airport_ID, Departure_Time,
