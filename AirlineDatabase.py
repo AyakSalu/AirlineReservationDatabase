@@ -46,11 +46,26 @@ def check_booking_availability(flight_id, seat_row, seat_col, passenger_id):
     # seat biri tarafından alınmış mı? ya da vatandaş zaten bu uçuştan bilet almış mı?
     command = (""" Select * from bookings
     Where Flight_ID = '%s' AND ((Seat_Row = '%s' AND Seat_Column = '%s') OR Passenger_ID = '%s') """ % (
-    flight_id, seat_row, seat_col, passenger_id))
+        flight_id, seat_row, seat_col, passenger_id))
     booking_available = len(executeCommand(command)) == 0
 
     # ikisi de boş kümeyse TRUE dönecek
     return booking_available
+
+
+def remove_booked_flight(flight_id, passport_num):
+    command = ("""DELETE FROM bookings
+    WHERE bookings.Flight_ID = '%s'
+    AND bookings.Passenger_ID IN (Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s')"""
+               % (flight_id, passport_num))
+    return executeCommand(command)
+
+
+def get_next_bookid():
+    maxBookingIdCommand = """SELECT max(Booking_ID)  
+                from bookings 
+                """
+    return executeCommand(maxBookingIdCommand)[0][0] + 1
 
 
 # bulamadıysa -1 dönüyo
@@ -89,19 +104,67 @@ def update_crew(fname, lname, phone_num, new_phone_num):
     return -1
 
 
-def remove_booked_flight(flight_id, passport_num):
-    command = ("""DELETE FROM bookings
-    WHERE bookings.Flight_ID = '%s'
-    AND bookings.Passenger_ID IN (Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s')"""
-               % (flight_id, passport_num))
+def get_flight_id(flight_code):
+    command = (""" SELECT flights.Flight_ID from flights where flights.Flight_Code = '%s' """ % (flight_code))
+    return executeCommand(command)[0][0]  # id'yi int olarak döner
+
+
+def remove_flight(flight_code):
+    flight_id = get_flight_id(flight_code)
+    if flight_id != -1:
+        command = """DELETE FROM flight as f WHERE f.Flight_ID = '%s' """ % flight_id
+        return executeCommand(command)
+    print("olmayan bir flight'ı silemezsin")
+    return -1
+
+
+def get_airport(airport_name):
+    command = (""" SELECT a.Airport_ID from airports as a where a.Airport_Name = '%s' """ % airport_name)
+    result = executeCommand(command)
+    return result[0][0] if len(result) > 0 else -1
+
+
+def add_flight(plane_id, departure_airport_name, arrival_airport_name, departure_time, arrival_time, flight_code,
+               brand=None):
+    departure_airport = get_airport(departure_airport_name)
+    arrival_airport = get_airport(arrival_airport_name)
+
+    if (departure_airport == -1 or arrival_airport == -1):
+        print("öyle bir airportlar yok ya da yanlış yazıldı")
+        return -1
+
+    if brand != None:
+        command = """ INSERT INTO airlinereservationsystem.flights (Plane_ID, Departure_Airport_ID, Arrival_Airport_ID, Departure_Time,
+Arrival_Time, Fligth_Status, Airline_Brand, Flight_Code)
+VALUES ('%s', '%s', '%s', '%s', '%s', 'On-Time', '%s', '%s')
+    """ % (plane_id, departure_airport, arrival_airport, departure_time, arrival_time, brand, flight_code)
+
+    else:
+        command = """ INSERT INTO airlinereservationsystem.flights (Plane_ID, Departure_Airport_ID, Arrival_Airport_ID, Departure_Time,
+                                                  Arrival_Time, Fligth_Status, Airline_Brand, Flight_Code)
+VALUES ('%s', '%s', '%s', '%s', '%s', 'On-Time', NULL, '%s')
+    """ % (plane_id, departure_airport, arrival_airport, departure_time, arrival_time, flight_code)
+
     return executeCommand(command)
 
+#status cancelled ise zaman girmesine gerek yok ama status kesinlikle "Cancelled" olmalı yoksa patlar
+def update_flight(flight_code, new_status, new_departure_time=None, new_arrival_time=None):
+    flight_id = get_flight_id(flight_code)
+    if flight_id == -1:
+        print("olmayan bir flight'ı değiştiremezsin")
+        return -1
 
-def get_next_bookid():
-    maxBookingIdCommand = """SELECT max(Booking_ID)  
-                from bookings 
-                """
-    return executeCommand(maxBookingIdCommand)[0][0] + 1
+    if new_status == "Delayed":
+        command = """UPDATE flights as f
+    SET f.Departure_Time = '%s',
+        f.Arrival_Time   = '%s',
+        f.Fligth_Status  = '%s'
+    WHERE f.Flight_ID = '%s' """ % (new_departure_time, new_arrival_time, new_status, flight_id)
+    else:
+        command = """UPDATE flights as f
+            SET f.Fligth_Status  = '%s'
+            WHERE f.Flight_ID = '%s' """ % (new_status, flight_id)
+    return executeCommand(command)
 
 
 app = Flask(__name__)
@@ -119,11 +182,6 @@ user_id = -1
 # Helper: Admin check
 def is_admin():
     return user_id == -1
-
-
-def get_flight_id(flight_code):
-    command = (""" SELECT flights.Flight_ID from flights where flights.Flight_Code = '%s' """ % (flight_code))
-    return executeCommand(command)[0][0]  # id'yi int olarak döner
 
 
 if __name__ == '__main__':
@@ -148,7 +206,12 @@ if __name__ == '__main__':
         # AND bookings.Passenger_ID IN  """ % (30, 123))
         # command = """ Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s' """ % (123)
 
-        print(get_crew_id("FirstName_1", "LastName_1", 8628822263))
+        print(executeCommand("""UPDATE airlinereservationsystem.flights t
+SET t.Departure_Time = '2024-11-20 21:08:11',
+    t.Arrival_Time   = '2024-11-13 21:08:12',
+    t.Fligth_Status  = 'Delayed'
+WHERE t.Flight_ID = '%s' """ % 33))
+        # print(get_crew_id("FirstName_1", "LastName_1", 8628822263))
 
         # print(check_booking_availability(30, 1000, 'Z', 104))
         # print(remove_booked_flight(30, 123))
