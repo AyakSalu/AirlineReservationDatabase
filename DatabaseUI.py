@@ -8,10 +8,105 @@ import tkinter.messagebox
 def bilet_iptal_et(flight_id, Passport_ID):
     return remove_booked_flight(flight_id, Passport_ID)
 
+def deleteCrew():
+    newWindow = Toplevel(root)
+    personEmailLabel = Label(newWindow, text="Crew ")
+    personEmailLabel.grid(sticky='W', row=5, column=1)
+    personEmailText = Text(newWindow, height=1, width=20)
+    personEmailText.grid(sticky='W', row=5, column=2)
+    return 0
+def updateCrew():
+    return 0
+def addCrew():
+    return 0
+def deleteFlight():
+    return 0
+def updateFlight():
+    return 0
+def addFlight():
+    return 0
+def deleteAirport():
+    return 0
+def updateAirport():
+    return 0
+def addAirport():
+    return 0
+def deletePlane():
+    return 0
+def updatePlane():
+    return 0
+def addPlane():
+    return 0
+def deleteFlightCrew():
+    return 0
+def updateFlightCrew():
+    return 0
+def addFlightCrew():
+    return 0
+
+def create_admin_controls(window):
+    
+    
+    crewLabel = Label(window, text="Crew")
+    deleteCrewButton = Button(window, text='Sil', height=1, command=deleteCrew, relief='solid')
+    updateCrewButton = Button(window, text='Güncelle', height=1, command=updateCrew, relief='solid')
+    addCrewButton = Button(window, text='Ekle', height=1, command=addCrew, relief='solid')
+    crewLabel.grid(row=0, column=0)
+    deleteCrewButton.grid(row=0, column=1)
+    updateCrewButton.grid(row=0, column=2)
+    addCrewButton.grid(row=0, column=3)
+    crewLabel = Label(window, text="Flight")
+    deleteCrewButton = Button(window, text='Sil', height=1, command=deleteFlight, relief='solid')
+    updateCrewButton = Button(window, text='Güncelle', height=1, command=updateFlight, relief='solid')
+    addCrewButton = Button(window, text='Ekle', height=1, command=addFlight, relief='solid')
+    crewLabel.grid(row=1, column=0)
+    deleteCrewButton.grid(row=1, column=1)
+    updateCrewButton.grid(row=1, column=2)
+    addCrewButton.grid(row=1, column=3)
+    crewLabel = Label(window, text="Airport")
+    deleteCrewButton = Button(window, text='Sil', height=1, command=deleteAirport, relief='solid')
+    updateCrewButton = Button(window, text='Güncelle', height=1, command=updateAirport, relief='solid')
+    addCrewButton = Button(window, text='Ekle', height=1, command=addAirport, relief='solid')
+    crewLabel.grid(row=2, column=0)
+    deleteCrewButton.grid(row=2, column=1)
+    updateCrewButton.grid(row=2, column=2)
+    addCrewButton.grid(row=2, column=3)
+    crewLabel = Label(window, text="Plane")
+    deleteCrewButton = Button(window, text='Sil', height=1, command=deletePlane, relief='solid')
+    updateCrewButton = Button(window, text='Güncelle', height=1, command=updatePlane, relief='solid')
+    addCrewButton = Button(window, text='Ekle', height=1, command=addPlane, relief='solid')
+    crewLabel.grid(row=3, column=0)
+    deleteCrewButton.grid(row=3, column=1)
+    updateCrewButton.grid(row=3, column=2)
+    addCrewButton.grid(row=3, column=3)
+    crewLabel = Label(window, text="FlightCrew")
+    deleteCrewButton = Button(window, text='Sil', height=1, command=deleteFlightCrew, relief='solid')
+    updateCrewButton = Button(window, text='Güncelle', height=1, command=updateFlightCrew, relief='solid')
+    addCrewButton = Button(window, text='Ekle', height=1, command=addFlightCrew, relief='solid')
+    crewLabel.grid(row=3, column=0)
+    deleteCrewButton.grid(row=3, column=1)
+    updateCrewButton.grid(row=3, column=2)
+    addCrewButton.grid(row=3, column=3)
+
+
+
+
 
 def set_admin_access():
+
+    
+    
+
     global admin_access
-    admin_access = 1 if admin_access == 0 else 0
+    if admin_access == 0:
+        admin_access = 1
+        
+        adminAccessFrame.grid(row=0, column=1000, columnspan=100,rowspan=100,sticky="n")
+    else: 
+        admin_access = 0
+        adminAccessFrame.grid_forget()
+
+    
 
 
 def filtrele():
@@ -24,7 +119,7 @@ def filtrele():
     global table
     print(Passport_ID)
     if len(Passport_ID) != 0:
-        command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Country,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Country, Arrival_Time , Airline  
+        command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Location,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Location, Arrival_Time , Airline  
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
@@ -52,7 +147,10 @@ def filtrele():
         lst = get_avaliable_flights(departureCity, arrivalCity)
         print(lst)
         total_rows = len(lst)
-        total_columns = len(lst[0])
+        try :
+            total_columns = len(lst[0])
+        except IndexError:
+            total_columns=0
 
         table = TableSearched(tablo, table, 0)
         tablo.grid(row=10, column=1, columnspan=100, rowspan=100)
@@ -60,7 +158,7 @@ def filtrele():
         # table = TableSearched(root,table,0)
         # tablo.grid(row=10,column=1,columnspan=100,rowspan=100)
     else:
-        command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Country,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Country, Arrival_Time , Airline
+        command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Location,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Location, Arrival_Time , Airline
             from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
                          join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
                          join planes on planes.Plane_ID = flights.Plane_ID
@@ -281,7 +379,7 @@ class TableSearched:
         self.e.configure(background='white')
         self.e.grid(row=5, column=4)
         self.Labels.append(self.e)
-        self.e = Label(root, text="Departure City", width=18, fg='black', borderwidth=1, relief='solid',
+        self.e = Label(root, text="Departure Location", width=18, fg='black', borderwidth=1, relief='solid',
                        font=('Arial', 8))
         self.e.configure(background='white')
         self.e.grid(row=5, column=5)
@@ -296,7 +394,7 @@ class TableSearched:
         self.e.grid(sticky='W', row=5, column=7)
         self.e.configure(background='white')
         self.Labels.append(self.e)
-        self.e = Label(root, text="Arrival City", width=18, fg='black', borderwidth=1, relief='solid',
+        self.e = Label(root, text="Arrival Location", width=18, fg='black', borderwidth=1, relief='solid',
                        font=('Arial', 8))
         self.e.grid(sticky='W', row=5, column=8)
         self.e.configure(background='white')
@@ -336,12 +434,13 @@ class TableSearched:
 
 # take the data
 
-command = """SELECT Flight_Code,departureAirport.Airport_Name, departureAirport.Country,Departure_Time, arrivalAirport.Airport_Name,arrivalAirport.Country, Arrival_Time , Airline
-            from flights join airports as arrivalAirport on arrivalAirport.Airport_ID = flights.arrival_Airport_ID 
-                         join airports as departureAirport on departureAirport.Airport_ID = flights.Departure_Airport_ID
-                         join planes on planes.Plane_ID = flights.Plane_ID
-
-            """
+command = """ SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time,Airline
+    FROM flights 
+    natural join planes
+    inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
+    inner join airports as a2 on a2.Airport_ID = flights.Arrival_Airport_ID
+    Where capacity > 0
+    """
 
 with app.app_context():
     lst = executeCommand(command)
@@ -390,6 +489,10 @@ adminCheckBox.grid(row=1, column=12)
 tablo = Frame(root)
 table = TableInitial(tablo)
 tablo.grid(row=10, column=1, columnspan=100, rowspan=100)
+
+adminAccessFrame = Frame(root)
+create_admin_controls(adminAccessFrame)
+
 
 root.mainloop()
 

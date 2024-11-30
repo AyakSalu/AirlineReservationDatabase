@@ -32,7 +32,7 @@ def insert_passengers(Fname, Lname, Passport_Number, Phone_Number, Email):
 
 
 def get_avaliable_flights(departure_country, arrival_country):
-    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time
+    command = (""" SELECT Flight_Code,a1.Airport_Name, a1.Location,Departure_Time, a2.Airport_Name,a2.Location, Arrival_Time,Airline
     FROM flights 
     natural join planes
     inner join airports as a1 on a1.Airport_ID = flights.Departure_Airport_ID
