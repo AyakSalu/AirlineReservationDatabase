@@ -142,12 +142,15 @@ def add_flight(plane_id, departure_airport_name, arrival_airport_name, departure
     departure_airport = get_airport(departure_airport_name)
     arrival_airport = get_airport(arrival_airport_name)
 
+    if(get_flight_id(flight_code) == -1):
+        print("öyle bir flight zaten var")
+        return -1
     if (departure_airport == -1 or arrival_airport == -1):
         print("öyle bir airportlar yok ya da yanlış yazıldı")
         return -1
     if(not compare_dates(departure_time,arrival_time)):
         print("varma zamanı, kalkma zamanından önce olamaz")
-
+        return -1
 
     if brand != None:
         command = """ INSERT INTO airlinereservationsystem.flights (Plane_ID, Departure_Airport_ID, Arrival_Airport_ID, Departure_Time,
@@ -182,6 +185,43 @@ def update_flight(flight_code, new_status, new_departure_time=None, new_arrival_
             WHERE f.Flight_ID = '%s' """ % (new_status, flight_id)
     return executeCommand(command)
 
+def add_flight_crew(flight_code ,fname, lname, phone_num):
+    flight_id = get_flight_id(flight_code)
+    crew_id = get_crew_id(fname, lname, phone_num)
+
+    if (flight_id != -1 and crew_id != -1):
+        print("öyle bir çalışan öyle bir flightta zaten çalışıyor.")
+        return -1
+    command = """INSERT INTO flight_crew (Flight_ID, Crew_ID) VALUES ('%s', '%s')""" % (flight_id, crew_id)
+    return executeCommand(command)
+
+def remove_flight_crew(flight_code ,fname, lname,phone_num):
+    flight_id = get_flight_id(flight_code)
+    crew_id = get_crew_id(fname, lname, phone_num)
+
+    if (flight_id == -1 or crew_id == -1):
+        print("çalışan veya flight bilgileri yanlış girildi.")
+        return -1
+    command = """DELETE FROM flight_crew where Flight_ID = '%s' and Crew_ID = '%s'""" % (flight_id, crew_id)
+    return executeCommand(command)
+
+def add_airport(airport_name, location, country, time_zone):
+    if(get_airport(airport_name) != -1):
+        print("öyle bir airport zaten eklendi")
+        return -1
+
+    command = ("""INSERT INTO airports (Airport_Name, Location, Country, Timezone) VALUES ('%s', '%s', '%s', '%s')"""
+               % (airport_name, location, country, time_zone))
+    return executeCommand(command)
+
+def remove_airport(airport_name):
+    airport_id = get_airport(airport_name)
+    if(airport_id == -1):
+        print("kayıylı böyle bir airport bulunmuyor")
+        return -1
+
+    command = """DELETE FROM airports as a where Airport_ID = '%s'""" % (airport_id)
+    return executeCommand(command)
 
 app = Flask(__name__)
 
@@ -222,13 +262,15 @@ if __name__ == '__main__':
         # AND bookings.Passenger_ID IN  """ % (30, 123))
         # command = """ Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s' """ % (123)
 
-        print(executeCommand("""UPDATE airlinereservationsystem.flights t
-SET t.Departure_Time = '2024-11-20 21:08:11',
-    t.Arrival_Time   = '2024-11-13 21:08:12',
-    t.Fligth_Status  = 'Delayed'
-WHERE t.Flight_ID = '%s' """ % 33))
+#         print(executeCommand("""UPDATE airlinereservationsystem.flights t
+# SET t.Departure_Time = '2024-11-20 21:08:11',
+#     t.Arrival_Time   = '2024-11-13 21:08:12',
+#     t.Fligth_Status  = 'Delayed'
+# WHERE t.Flight_ID = '%s' """ % 33))
         # print(get_crew_id("FirstName_1", "LastName_1", 8628822263))
 
+        print(executeCommand("""INSERT INTO airlinereservationsystem.airports (Airport_Name, Location, Country, Timezone)
+VALUES ('Airport_11', 'City_1, Country_1', 'Brazil', 'PST');"""))
         # print(check_booking_availability(30, 1000, 'Z', 104))
         # print(remove_booked_flight(30, 123))
         # mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE
