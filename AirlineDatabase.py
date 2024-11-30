@@ -45,11 +45,44 @@ def get_avaliable_flights(departure_country, arrival_country):
 def check_booking_availability(flight_id, seat_row, seat_col, passenger_id):
     # seat biri tarafından alınmış mı? ya da vatandaş zaten bu uçuştan bilet almış mı?
     command = (""" Select * from bookings
-    Where Flight_ID = '%s' AND ((Seat_Row = '%s' AND Seat_Column = '%s') OR Passenger_ID = '%s') """ % (flight_id, seat_row, seat_col, passenger_id))
+    Where Flight_ID = '%s' AND ((Seat_Row = '%s' AND Seat_Column = '%s') OR Passenger_ID = '%s') """ % (
+    flight_id, seat_row, seat_col, passenger_id))
     booking_available = len(executeCommand(command)) == 0
 
-    #ikisi de boş kümeyse TRUE dönecek
+    # ikisi de boş kümeyse TRUE dönecek
     return booking_available
+
+
+# bulamadıysa -1 dönüyo
+def get_crew_id(fname, lname, phone_num):
+    command = (""" SELECT c.Crew_ID FROM crew as c WHERE c.Fname = '%s' AND c.Lname = '%s' AND c.Phone_Number = '%s' """
+               % (fname, lname, phone_num))
+    result = executeCommand(command)
+    return result[0][0] if len(result) > 0 else -1
+
+
+def remove_crew(crew_id):
+    command = """DELETE FROM crew WHERE crew.Crew_ID = '%s' """ % (crew_id)
+    return executeCommand(command)
+
+
+# ekleyemediyse -1 dönüyor
+def add_crew(fname, lname, phone_num, crew_role):
+    if get_crew_id(fname, lname, phone_num) != -1:
+        command = ("""INSERT INTO crew (Fname, Lname, Crew_Role, Phone_Number) VALUES ('%s', '%s', '%s', '%s') """ %
+                   (fname, lname, crew_role, phone_num))
+        return executeCommand(command)
+    print("zaten öyle biri var")
+    return -1
+
+
+def update_crew(fname, lname, phone_num, new_phone_num):
+    crew_id = get_crew_id(fname, lname, phone_num)
+    if crew_id != -1:
+        command = """UPDATE crew as c SET c.Phone_Number = '%s' WHERE c.Crew_ID = '%s' """ % (new_phone_num, crew_id)
+        return executeCommand(command)
+    print("olmayan birini güncelleyemezsin")
+    return -1
 
 
 def remove_booked_flight(flight_id, passport_num):
@@ -92,6 +125,7 @@ def get_flight_id(flight_code):
 if __name__ == '__main__':
     with app.app_context():
         # cursor = mysql.connection.cursor()
+
         command = """
             INSERT INTO bookings(Flight_ID, Passenger_ID, Booking_Date, Seat_Column, Seat_Row, Booking_Status, Seat_Type)
             VALUES (1,100, '2069-11-28 12:00:00', 'A' ,11 ,'Confirmed','Economy');
@@ -110,13 +144,8 @@ if __name__ == '__main__':
         # AND bookings.Passenger_ID IN  """ % (30, 123))
         # command = """ Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s' """ % (123)
 
-        command = ("""SELECT * FROM bookings
-    WHERE bookings.Flight_ID = '%s'
-    AND bookings.Passenger_ID IN (Select Distinct(Passenger_ID) from passengers WHERE passengers.Passport_Number = '%s')"""
-                   % (30, 123))
-        # command = """ (SELECT unique(Passenger_ID) from passengers WHERE Passport_Number = '%s') """ % (123)
-        print(executeCommand(command))
+        print(get_crew_id("FirstName_1", "LastName_1", 8628822263))
 
-        #print(check_booking_availability(30, 1000, 'Z', 104))
+        # print(check_booking_availability(30, 1000, 'Z', 104))
         # print(remove_booked_flight(30, 123))
         # mysql.connection.commit()  # Ensure changes are saved to the database for INSERT/UPDATE/DELETE
