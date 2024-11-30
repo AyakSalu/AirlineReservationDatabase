@@ -61,9 +61,13 @@ def get_crew_id(fname, lname, phone_num):
     return result[0][0] if len(result) > 0 else -1
 
 
-def remove_crew(crew_id):
-    command = """DELETE FROM crew WHERE crew.Crew_ID = '%s' """ % (crew_id)
-    return executeCommand(command)
+def remove_crew(fname, lname, phone_num):
+    crew_id = get_crew_id(fname, lname, phone_num)
+    if crew_id != -1:
+        command = """DELETE FROM crew WHERE crew.Crew_ID = '%s' """ % crew_id
+        return executeCommand(command)
+    print("olmayan birini silemezsin")
+    return -1
 
 
 # ekleyemediyse -1 dönüyor
