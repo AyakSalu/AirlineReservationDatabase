@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import Label, Tk, Text, Button, Toplevel, Checkbutton, ttk, Frame
-from AirlineDatabase import executeCommand, app, get_avaliable_flights, remove_booked_flight, get_flight_id,check_booking_availability,remove_crew,add_crew,update_crew,remove_flight,add_flight,update_flight,add_flight_crew,remove_flight_crew,add_airport,remove_airport
+from AirlineDatabase import executeCommand, app, get_avaliable_flights,update_flight_crew, remove_booked_flight, get_flight_id,check_booking_availability,remove_crew,add_crew,update_crew,remove_flight,add_flight,update_flight,add_flight_crew,remove_flight_crew,add_airport,remove_airport
 from datetime import datetime
 import tkinter.messagebox
 
@@ -70,7 +70,7 @@ def addCrew():
         fname = crewFnameText.get("1.0", 'end-1c')
         lname = crewLnameText.get("1.0", 'end-1c')
         phone_num = crewPhoneNumText.get("1.0", 'end-1c')
-        crew_role = crewRoleText.get("1.0", 'end-1c')
+        crew_role = personPurchaseType.get()
         if add_crew(fname, lname, phone_num,crew_role) != -1:
             newWindow.destroy()
         else:
@@ -91,8 +91,9 @@ def addCrew():
     crewPhoneNumText.grid(sticky='W', row=2, column=1)
     crewRoleLabel = Label(newWindow, text="Rol ")
     crewRoleLabel.grid(sticky='W', row=3, column=0)
-    crewRoleText = Text(newWindow, height=1, width=20)
-    crewRoleText.grid(sticky='W', row=3, column=1)
+    personPurchaseType = ttk.Combobox(newWindow, height=3, width=15)
+    personPurchaseType['values'] = ('Cook', 'Pilot', 'Co-Pilot', 'Flight Attendant')
+    personPurchaseType.grid(sticky='W', row=3, column=1)
     applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
     applyButton.grid(row=0, column=2)
     return 0
@@ -282,7 +283,35 @@ def deleteFlightCrew():
     applyButton.grid(row=0, column=2)
     return 0
 def updateFlightCrew():
-    
+    def apply():
+        flight_code = planeIDText.get("1.0", 'end-1c')
+        fname = departureAirportText.get("1.0", 'end-1c')
+        lname = arrivalAirportText.get("1.0", 'end-1c')
+        phone_num = crewPhoneNumText.get("1.0", 'end-1c')
+        if update_flight_crew(fname, lname, phone_num,flight_code) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="New Flight Code")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    planeIDText = Text(newWindow, height=1, width=20)
+    planeIDText.grid(sticky='W', row=0, column=1)
+    departureAirportLabel = Label(newWindow, text="İsim")
+    departureAirportLabel.grid(sticky='W', row=1, column=0)
+    departureAirportText = Text(newWindow, height=1, width=20)
+    departureAirportText.grid(sticky='W', row=1, column=1)
+    arrivalAirportLabel = Label(newWindow, text="Soyisim")
+    arrivalAirportLabel.grid(sticky='W', row=2, column=0)
+    arrivalAirportText = Text(newWindow, height=1, width=20)
+    arrivalAirportText.grid(sticky='W', row=2, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Telefon Numarası")
+    crewPhoneNumLabel.grid(sticky='W', row=3, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=3, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 def addFlightCrew():
     def apply():

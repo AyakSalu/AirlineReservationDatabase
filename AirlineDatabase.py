@@ -73,6 +73,7 @@ def get_crew_id(fname, lname, phone_num):
     command = (""" SELECT c.Crew_ID FROM crew as c WHERE c.Fname = '%s' AND c.Lname = '%s' AND c.Phone_Number = '%s' """
                % (fname, lname, phone_num))
     result = executeCommand(command)
+    print(result)
     return result[0][0] if len(result) > 0 else -1
 
 
@@ -87,13 +88,23 @@ def remove_crew(fname, lname, phone_num):
 
 # ekleyemediyse -1 dönüyor
 def add_crew(fname, lname, phone_num, crew_role):
-    if get_crew_id(fname, lname, phone_num) != -1:
+    if get_crew_id(fname, lname, phone_num) == -1:
         command = ("""INSERT INTO crew (Fname, Lname, Crew_Role, Phone_Number) VALUES ('%s', '%s', '%s', '%s') """ %
                    (fname, lname, crew_role, phone_num))
         return executeCommand(command)
     print("zaten öyle biri var")
     return -1
 
+def update_flight_crew(fname,lname,phone_num,flight_code):
+    flight_crew_id = get_flight_crew(fname, lname, phone_num)
+    flight_id = get_flight_id(flight_code)
+    print(flight_id)
+    print(flight_crew_id)
+    if flight_crew_id != -1 and flight_id != -1:
+        command = """UPDATE flight_crew as c SET c.Flight_ID = '%s' WHERE c.flight_crew_id = '%s' """ % (flight_id, flight_crew_id)
+        return executeCommand(command)
+    print("olmayan birini güncelleyemezsin")
+    return -1
 
 def update_crew(fname, lname, phone_num, new_phone_num):
     crew_id = get_crew_id(fname, lname, phone_num)
@@ -192,12 +203,26 @@ def update_flight(flight_code, new_status, new_departure_time=None, new_arrival_
 def add_flight_crew(flight_code ,fname, lname, phone_num):
     flight_id = get_flight_id(flight_code)
     crew_id = get_crew_id(fname, lname, phone_num)
-
-    if (flight_id != -1 and crew_id != -1):
-        print("öyle bir çalışan öyle bir flightta zaten çalışıyor.")
+    print(crew_id)
+    print(flight_id)
+    if crew_id == -1:
+        print("hata.")
         return -1
-    command = """INSERT INTO flight_crew (Flight_ID, Crew_ID) VALUES ('%s', '%s')""" % (flight_id, crew_id)
-    return executeCommand(command)
+    if flight_id == -1:
+        print("hata.")
+        return -1  
+    if get_flight_crew(fname, lname, phone_num) == -1:
+        command = """INSERT INTO flight_crew (Flight_ID, Crew_ID) VALUES ('%s', '%s')""" % (flight_id, crew_id)
+        return executeCommand(command)
+    return -1
+def get_flight_crew(fname, lname, phone_num):
+    
+    command = """Select Flight_Crew_ID from flight_crew  join crew on crew.Crew_ID = flight_crew.Crew_ID
+                Where Fname = '%s'and Lname = '%s' and Phone_Number = '%s'
+    """ % (fname, lname,phone_num)
+    result = executeCommand(command)
+    return result[0][0] if len(result) > 0 else -1
+
 
 def remove_flight_crew(flight_code ,fname, lname,phone_num):
     flight_id = get_flight_id(flight_code)
