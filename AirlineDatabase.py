@@ -106,13 +106,17 @@ def update_crew(fname, lname, phone_num, new_phone_num):
 
 def get_flight_id(flight_code):
     command = (""" SELECT flights.Flight_ID from flights where flights.Flight_Code = '%s' """ % (flight_code))
-    return executeCommand(command)[0][0]  # id'yi int olarak döner
+    try :
+        return executeCommand(command)[0][0]
+    except IndexError:
+        return -1
+      # id'yi int olarak döner hata -1
 
 
 def remove_flight(flight_code):
     flight_id = get_flight_id(flight_code)
     if flight_id != -1:
-        command = """DELETE FROM flight as f WHERE f.Flight_ID = '%s' """ % flight_id
+        command = """DELETE FROM flights as f WHERE f.Flight_ID = '%s' """ % flight_id
         return executeCommand(command)
     print("olmayan bir flight'ı silemezsin")
     return -1

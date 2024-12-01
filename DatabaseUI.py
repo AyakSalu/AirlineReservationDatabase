@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import Label, Tk, Text, Button, Toplevel, Checkbutton, ttk, Frame
-from AirlineDatabase import executeCommand, app, get_avaliable_flights, remove_booked_flight, get_flight_id,check_booking_availability
+from AirlineDatabase import executeCommand, app, get_avaliable_flights, remove_booked_flight, get_flight_id,check_booking_availability,remove_crew,add_crew,update_crew,remove_flight,add_flight,update_flight,add_flight_crew,remove_flight_crew,add_airport,remove_airport
 from datetime import datetime
 import tkinter.messagebox
 
@@ -9,27 +9,239 @@ def bilet_iptal_et(flight_id, Passport_ID):
     return remove_booked_flight(flight_id, Passport_ID)
 
 def deleteCrew():
+    def apply():
+        fname = crewFnameText.get("1.0", 'end-1c')
+        lname = crewLnameText.get("1.0", 'end-1c')
+        phone_num = crewPhoneNumText.get("1.0", 'end-1c')
+        if remove_crew(fname, lname, phone_num) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
     newWindow = Toplevel(root)
-    personEmailLabel = Label(newWindow, text="Crew ")
-    personEmailLabel.grid(sticky='W', row=5, column=1)
-    personEmailText = Text(newWindow, height=1, width=20)
-    personEmailText.grid(sticky='W', row=5, column=2)
+    crewFnameLabel = Label(newWindow, text="İsim ")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    crewFnameText = Text(newWindow, height=1, width=20)
+    crewFnameText.grid(sticky='W', row=0, column=1)
+    crewLnameLabel = Label(newWindow, text="Soyisim ")
+    crewLnameLabel.grid(sticky='W', row=1, column=0)
+    crewLnameText = Text(newWindow, height=1, width=20)
+    crewLnameText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Telefon Numarası")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
+    
     return 0
 def updateCrew():
+    def apply():
+        fname = crewFnameText.get("1.0", 'end-1c')
+        lname = crewLnameText.get("1.0", 'end-1c')
+        phone_num = crewPhoneNumText.get("1.0", 'end-1c')
+        new_phone_num = crewNewPhoneNumText.get("1.0", 'end-1c')
+        if update_crew(fname, lname, phone_num, new_phone_num) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="İsim ")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    crewFnameText = Text(newWindow, height=1, width=20)
+    crewFnameText.grid(sticky='W', row=0, column=1)
+    crewLnameLabel = Label(newWindow, text="Soyisim ")
+    crewLnameLabel.grid(sticky='W', row=1, column=0)
+    crewLnameText = Text(newWindow, height=1, width=20)
+    crewLnameText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Eski Telefon Numarası")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    crewNewPhoneNumLabel = Label(newWindow, text="Yeni Telefon Numarası")
+    crewNewPhoneNumLabel.grid(sticky='W', row=3, column=0)
+    crewNewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewNewPhoneNumText.grid(sticky='W', row=3, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 def addCrew():
+    def apply():
+        fname = crewFnameText.get("1.0", 'end-1c')
+        lname = crewLnameText.get("1.0", 'end-1c')
+        phone_num = crewPhoneNumText.get("1.0", 'end-1c')
+        crew_role = crewRoleText.get("1.0", 'end-1c')
+        if add_crew(fname, lname, phone_num,crew_role) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="İsim ")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    crewFnameText = Text(newWindow, height=1, width=20)
+    crewFnameText.grid(sticky='W', row=0, column=1)
+    crewLnameLabel = Label(newWindow, text="Soyisim ")
+    crewLnameLabel.grid(sticky='W', row=1, column=0)
+    crewLnameText = Text(newWindow, height=1, width=20)
+    crewLnameText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Telefon Numarası")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    crewRoleLabel = Label(newWindow, text="Rol ")
+    crewRoleLabel.grid(sticky='W', row=3, column=0)
+    crewRoleText = Text(newWindow, height=1, width=20)
+    crewRoleText.grid(sticky='W', row=3, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
+
 def deleteFlight():
+    def apply():
+        flight_code = flightCodeText.get("1.0", 'end-1c')
+
+        if remove_flight(flight_code) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    flightCodeLabel = Label(newWindow, text="Flight Code")
+    flightCodeLabel.grid(sticky='W', row=0, column=0)
+    flightCodeText = Text(newWindow, height=1, width=20)
+    flightCodeText.grid(sticky='W', row=0, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
+
 def updateFlight():
+    def apply():
+        flight_code = crewFnameText.get("1.0", 'end-1c')
+        new_status = flightType.get()
+        new_departure_time = crewPhoneNumText.get("1.0", 'end-1c')
+        new_arrival_time = crewRoleText.get("1.0", 'end-1c')
+        if update_flight(flight_code, new_status, new_departure_time,new_arrival_time) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="Flight Code")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    crewFnameText = Text(newWindow, height=1, width=20)
+    crewFnameText.grid(sticky='W', row=0, column=1)
+    crewLnameLabel = Label(newWindow, text="Yeni Durum")
+    crewLnameLabel.grid(sticky='W', row=1, column=0)
+    flightType = ttk.Combobox(newWindow, height=3, width=24)
+    flightType['values'] = ('Cancelled', 'Delayed', 'On-Time')
+    flightType.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Yeni Kalkış Zamanı(YYYY-MM-DD HH:MM:SS)")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    crewRoleLabel = Label(newWindow, text="Yeni Varış Zamanı(YYYY-MM-DD HH:MM:SS)")
+    crewRoleLabel.grid(sticky='W', row=3, column=0)
+    crewRoleText = Text(newWindow, height=1, width=20)
+    crewRoleText.grid(sticky='W', row=3, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 def addFlight():
+    def apply():
+        plane_id = planeIDText.get("1.0", 'end-1c')
+        departure_airport_name = departureAirportText.get("1.0", 'end-1c')
+        arrival_airport_name = arrivalAirportText.get("1.0", 'end-1c')
+        departure_time = crewPhoneNumText.get("1.0", 'end-1c')
+        arrival_time = crewRoleText.get("1.0", 'end-1c')
+        flight_code = fligtCodeText.get("1.0", 'end-1c')
+        brand = brandText.get("1.0", 'end-1c')
+        if add_flight(plane_id, departure_airport_name,arrival_airport_name, departure_time,arrival_time,flight_code,brand) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="Plane ID")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    planeIDText = Text(newWindow, height=1, width=20)
+    planeIDText.grid(sticky='W', row=0, column=1)
+    departureAirportLabel = Label(newWindow, text="Kalkış Havalimanı Adı")
+    departureAirportLabel.grid(sticky='W', row=1, column=0)
+    departureAirportText = Text(newWindow, height=1, width=20)
+    departureAirportText.grid(sticky='W', row=1, column=1)
+    arrivalAirportLabel = Label(newWindow, text="Varış Havalimanı Adı")
+    arrivalAirportLabel.grid(sticky='W', row=1, column=0)
+    arrivalAirportText = Text(newWindow, height=1, width=20)
+    arrivalAirportText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Kalkış Zamanı(YYYY-MM-DD HH:MM:SS)")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    crewRoleLabel = Label(newWindow, text="Varış Zamanı(YYYY-MM-DD HH:MM:SS)")
+    crewRoleLabel.grid(sticky='W', row=3, column=0)
+    crewRoleText = Text(newWindow, height=1, width=20)
+    crewRoleText.grid(sticky='W', row=3, column=1)
+    fligtCodeLabel = Label(newWindow, text="Flight Code")
+    fligtCodeLabel.grid(sticky='W', row=4, column=0)
+    fligtCodeText = Text(newWindow, height=1, width=20)
+    fligtCodeText.grid(sticky='W', row=4, column=1)
+    brandLabel = Label(newWindow, text="Plane Brand")
+    brandLabel.grid(sticky='W', row=5, column=0)
+    brandText = Text(newWindow, height=1, width=20)
+    brandText.grid(sticky='W', row=5, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 def deleteAirport():
+    def apply():
+        airport_name = planeIDText.get("1.0", 'end-1c')
+        if remove_airport(airport_name) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="Havalimanı Adı")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    planeIDText = Text(newWindow, height=1, width=20)
+    planeIDText.grid(sticky='W', row=0, column=1)
+    
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
-def updateAirport():
-    return 0
+
 def addAirport():
+    def apply():
+        airport_name = planeIDText.get("1.0", 'end-1c')
+        location = departureAirportText.get("1.0", 'end-1c')
+        country = arrivalAirportText.get("1.0", 'end-1c')
+        time_zone = crewPhoneNumText.get("1.0", 'end-1c')
+
+        if add_airport(airport_name, location,country, time_zone) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="Havalimanı Adı")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    planeIDText = Text(newWindow, height=1, width=20)
+    planeIDText.grid(sticky='W', row=0, column=1)
+    departureAirportLabel = Label(newWindow, text="Konum")
+    departureAirportLabel.grid(sticky='W', row=1, column=0)
+    departureAirportText = Text(newWindow, height=1, width=20)
+    departureAirportText.grid(sticky='W', row=1, column=1)
+    arrivalAirportLabel = Label(newWindow, text="Ülke")
+    arrivalAirportLabel.grid(sticky='W', row=1, column=0)
+    arrivalAirportText = Text(newWindow, height=1, width=20)
+    arrivalAirportText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Zaman Dilimi")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 def deletePlane():
     return 0
@@ -38,10 +250,71 @@ def updatePlane():
 def addPlane():
     return 0
 def deleteFlightCrew():
+    def apply():
+        flight_code = planeIDText.get("1.0", 'end-1c')
+        fname = departureAirportText.get("1.0", 'end-1c')
+        lname = arrivalAirportText.get("1.0", 'end-1c')
+        phone_num = crewPhoneNumText.get("1.0", 'end-1c')
+
+        if remove_flight_crew(flight_code ,fname, lname, phone_num) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="Flight Code")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    planeIDText = Text(newWindow, height=1, width=20)
+    planeIDText.grid(sticky='W', row=0, column=1)
+    departureAirportLabel = Label(newWindow, text="İsim")
+    departureAirportLabel.grid(sticky='W', row=1, column=0)
+    departureAirportText = Text(newWindow, height=1, width=20)
+    departureAirportText.grid(sticky='W', row=1, column=1)
+    arrivalAirportLabel = Label(newWindow, text="Soyisim")
+    arrivalAirportLabel.grid(sticky='W', row=1, column=0)
+    arrivalAirportText = Text(newWindow, height=1, width=20)
+    arrivalAirportText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Telefon Numarası")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 def updateFlightCrew():
+    
     return 0
 def addFlightCrew():
+    def apply():
+        flight_code = planeIDText.get("1.0", 'end-1c')
+        fname = departureAirportText.get("1.0", 'end-1c')
+        lname = arrivalAirportText.get("1.0", 'end-1c')
+        phone_num = crewPhoneNumText.get("1.0", 'end-1c')
+
+        if add_flight_crew(flight_code ,fname, lname, phone_num) != -1:
+            newWindow.destroy()
+        else:
+            tkinter.messagebox.showinfo("Hata.",  "Girdiğiniz Bilgi Hatalı")
+        
+    newWindow = Toplevel(root)
+    crewFnameLabel = Label(newWindow, text="Flight Code")
+    crewFnameLabel.grid(sticky='W', row=0, column=0)
+    planeIDText = Text(newWindow, height=1, width=20)
+    planeIDText.grid(sticky='W', row=0, column=1)
+    departureAirportLabel = Label(newWindow, text="İsim")
+    departureAirportLabel.grid(sticky='W', row=1, column=0)
+    departureAirportText = Text(newWindow, height=1, width=20)
+    departureAirportText.grid(sticky='W', row=1, column=1)
+    arrivalAirportLabel = Label(newWindow, text="Soyisim")
+    arrivalAirportLabel.grid(sticky='W', row=1, column=0)
+    arrivalAirportText = Text(newWindow, height=1, width=20)
+    arrivalAirportText.grid(sticky='W', row=1, column=1)
+    crewPhoneNumLabel = Label(newWindow, text="Telefon Numarası")
+    crewPhoneNumLabel.grid(sticky='W', row=2, column=0)
+    crewPhoneNumText = Text(newWindow, height=1, width=20)
+    crewPhoneNumText.grid(sticky='W', row=2, column=1)
+    applyButton =  Button(newWindow, text='Uygula', height=1, command=apply, relief='solid')
+    applyButton.grid(row=0, column=2)
     return 0
 
 def create_admin_controls(window):
@@ -65,11 +338,9 @@ def create_admin_controls(window):
     addCrewButton.grid(row=1, column=3)
     crewLabel = Label(window, text="Airport")
     deleteCrewButton = Button(window, text='Sil', height=1, command=deleteAirport, relief='solid')
-    updateCrewButton = Button(window, text='Güncelle', height=1, command=updateAirport, relief='solid')
     addCrewButton = Button(window, text='Ekle', height=1, command=addAirport, relief='solid')
     crewLabel.grid(row=2, column=0)
     deleteCrewButton.grid(row=2, column=1)
-    updateCrewButton.grid(row=2, column=2)
     addCrewButton.grid(row=2, column=3)
     crewLabel = Label(window, text="Plane")
     deleteCrewButton = Button(window, text='Sil', height=1, command=deletePlane, relief='solid')
@@ -83,10 +354,10 @@ def create_admin_controls(window):
     deleteCrewButton = Button(window, text='Sil', height=1, command=deleteFlightCrew, relief='solid')
     updateCrewButton = Button(window, text='Güncelle', height=1, command=updateFlightCrew, relief='solid')
     addCrewButton = Button(window, text='Ekle', height=1, command=addFlightCrew, relief='solid')
-    crewLabel.grid(row=3, column=0)
-    deleteCrewButton.grid(row=3, column=1)
-    updateCrewButton.grid(row=3, column=2)
-    addCrewButton.grid(row=3, column=3)
+    crewLabel.grid(row=4, column=0)
+    deleteCrewButton.grid(row=4, column=1)
+    updateCrewButton.grid(row=4, column=2)
+    addCrewButton.grid(row=4, column=3)
 
 
 
