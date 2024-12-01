@@ -146,7 +146,7 @@ def add_flight(plane_id, departure_airport_name, arrival_airport_name, departure
     departure_airport = get_airport(departure_airport_name)
     arrival_airport = get_airport(arrival_airport_name)
 
-    if(get_flight_id(flight_code) == -1):
+    if(get_flight_id(flight_code) != -1):
         print("öyle bir flight zaten var")
         return -1
     if (departure_airport == -1 or arrival_airport == -1):
